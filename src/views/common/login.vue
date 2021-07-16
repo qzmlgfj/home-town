@@ -125,11 +125,21 @@ export default {
                             captcha: this.dataForm.captcha,
                         }),
                     }).then(({ data }) => {
+                        console.log(data);
+                        /* TODO 对接远程后端
                         if (data && data.code === 0) {
                             this.$cookie.set("token", data.token);
                             this.$router.replace({ name: "home" });
                         } else {
                             this.getCaptcha();
+                            this.$message.error(data.msg);
+                        }
+                        */
+                        if (data && data.code !== 0) {
+                            //TODO 改下cookie
+                            this.$cookie.set("token", data.token);
+                            this.$router.replace({ name: "home" });
+                        } else {
                             this.$message.error(data.msg);
                         }
                     });
