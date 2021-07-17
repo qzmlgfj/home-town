@@ -151,6 +151,7 @@ export default {
                                     param.phonenumber
                                 );
                                 localStorage.setItem("ms_usertype", "user");
+                                router.push("/user");
                                 break;
                             case 5003:
                                 ElMessage.info("欢迎，管理员" + response.data);
@@ -163,11 +164,11 @@ export default {
                                     param.phonenumber
                                 );
                                 localStorage.setItem("ms_usertype", "admin");
+                                router.push("/admin");
                                 break;
                             default:
                                 break;
                         }
-                        router.push("/user");
                     });
                 } else {
                     ElMessage.error("登录失败");
