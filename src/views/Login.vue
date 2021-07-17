@@ -1,7 +1,7 @@
 <template>
     <div class="login-wrap">
         <div class="ms-login">
-            <div class="ms-title">后台管理系统</div>
+            <div class="ms-title">示范区基层公开监督管理平台</div>
             <el-form
                 :model="param"
                 :rules="rules"
@@ -39,7 +39,6 @@
                         >注册</el-button
                     >
                 </div>
-                <p class="login-tips">Tips : 用户名和密码随便填。</p>
             </el-form>
         </div>
         <el-dialog title="新用户注册" v-model="dialogVisible" width="30%">
@@ -63,9 +62,7 @@
                         placeholder="手机号码"
                     >
                         <template #prepend>
-                            <el-button
-                                icon="el-icon-phone"
-                            ></el-button>
+                            <el-button icon="el-icon-phone"></el-button>
                         </template>
                     </el-input>
                 </el-form-item>
@@ -105,9 +102,9 @@ export default {
     setup() {
         const router = useRouter();
         const param = reactive({
-            username: "admin",
-            phonenumber: "123456",
-            password: "123123",
+            username: "",
+            phonenumber: "19982006582",
+            password: "123",
         });
 
         const rules = {
@@ -130,19 +127,84 @@ export default {
                     service({
                         method: "post",
                         url: "/sys/login",
-                        data: { name: "Ant" },
-                    }).then((response) => console.log(response));
-                    localStorage.setItem("ms_username", param.username);
-                    router.push("/");
+                        data: {
+                            phone_number: param.phonenumber,
+                            password: param.password,
+                        },
+                    }).then((response) => {
+                        console.log(response);
+                        switch (response.code) {
+                            case 5001:
+                                ElMessage.error("用户不存在");
+                                return false;
+                            case 5002:
+                                ElMessage.info(
+                                    "欢迎，普通用户" + response.data
+                                );
+                                localStorage.setItem(
+                                    "ms_username",
+                                    response.data
+                                );
+                                localStorage.setItem(
+                                    "ms_userphone",
+                                    param.phonenumber
+                                );
+                                localStorage.setItem("ms_usertype", "user");
+                                router.push("/user");
+                                break;
+                            case 5003:
+                                ElMessage.info("欢迎，管理员" + response.data);
+                                localStorage.setItem(
+                                    "ms_username",
+                                    response.data
+                                );
+                                localStorage.setItem(
+                                    "ms_userphone",
+                                    param.phonenumber
+                                );
+                                localStorage.setItem("ms_usertype", "admin");
+                                router.push("/admin");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
                 } else {
-                    ElMessage.error("登录成功");
+                    ElMessage.error("登录失败");
                     return false;
                 }
             });
         };
 
         const regisiterHandle = () => {
-            ElMessage.info("注册...");
+            login.value.validate((valid) => {
+                if (valid) {
+                    service({
+                        method: "post",
+                        url: "/sys/register",
+                        data: {
+                            user_name: param.username,
+                            phone_number: param.phonenumber,
+                            password: param.password,
+                        },
+                    }).then((response) => {
+                        switch (response.code) {
+                            case 5004:
+                                ElMessage.info("注册成功");
+                                store.commit("closeRegisterDialog");
+                                break;
+                            case 5005:
+                                ElMessage.error("用户已存在");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                } else {
+                    ElMessage.error("注册失败");
+                    return false;
+                }
+            });
         };
 
         const store = useStore();
@@ -156,10 +218,15 @@ export default {
             regisiterHandle,
         };
     },
-    data() {
-        return {
-            dialogVisible: false,
-        };
+    computed: {
+        dialogVisible: {
+            get() {
+                return this.$store.state.registerDialogVisible;
+            },
+            set(value) {
+                this.$store.commit("setRegisterDialog", value);
+            },
+        },
     },
 };
 </script>

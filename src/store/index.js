@@ -1,9 +1,10 @@
-import {createStore} from 'vuex'
+import { createStore } from 'vuex'
 
 export default createStore({
     state: {
         tagsList: [],
-        collapse: false
+        collapse: false,
+        registerDialogVisible: false
     },
     mutations: {
         delTagsItem(state, data) {
@@ -49,6 +50,15 @@ export default createStore({
         // 侧边栏折叠
         handleCollapse(state, data) {
             state.collapse = data;
+        },
+        showRegisterDialog(state) {
+            state.registerDialogVisible = true;
+        },
+        closeRegisterDialog(state) {
+            state.registerDialogVisible = false;
+        },
+        setRegisterDialog(state,value) {
+            state.registerDialogVisible = value;
         }
     },
     actions: {},

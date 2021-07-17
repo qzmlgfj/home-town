@@ -40,17 +40,17 @@ export default {
         const items = [
             {
                 icon: "el-icon-lx-home",
-                index: "/dashboard",
+                index: "/admin/dashboard",
                 title: "系统首页",
             },
             {
                 icon: "el-icon-lx-cascades",
-                index: "/table",
+                index: "/admin/table",
                 title: "基础表格",
             },
             {
                 icon: "el-icon-lx-copy",
-                index: "/tabs",
+                index: "/admin/tabs",
                 title: "tab选项卡",
             },
             {
@@ -59,11 +59,11 @@ export default {
                 title: "表单相关",
                 subs: [
                     {
-                        index: "/form",
+                        index: "/admin/form",
                         title: "基本表单",
                     },
                     {
-                        index: "/upload",
+                        index: "/admin/upload",
                         title: "文件上传",
                     },
                     {
@@ -71,7 +71,7 @@ export default {
                         title: "三级菜单",
                         subs: [
                             {
-                                index: "/editor",
+                                index: "/admin/editor",
                                 title: "富文本编辑器",
                             },
                         ],
@@ -80,37 +80,38 @@ export default {
             },
             {
                 icon: "el-icon-lx-emoji",
-                index: "/icon",
+                index: "/admin/icon",
                 title: "自定义图标",
             },
             {
                 icon: "el-icon-pie-chart",
-                index: "/charts",
+                index: "/admin/charts",
                 title: "schart图表",
             },
             {
                 icon: "el-icon-lx-global",
-                index: "/i18n",
+                index: "/admin/i18n",
                 title: "国际化功能",
             },
             {
+                //TODO 考虑是否需要/admin前缀
                 icon: "el-icon-lx-warn",
                 index: "7",
                 title: "错误处理",
                 subs: [
                     {
-                        index: "/permission",
+                        index: "/admin/permission",
                         title: "权限测试",
                     },
                     {
-                        index: "/404",
+                        index: "/admin/404",
                         title: "404页面",
                     },
                 ],
             },
             {
                 icon: "el-icon-lx-redpacket_fill",
-                index: "/donate",
+                index: "/admin/donate",
                 title: "支持作者",
             },
         ];
