@@ -63,9 +63,7 @@
                         placeholder="手机号码"
                     >
                         <template #prepend>
-                            <el-button
-                                icon="el-icon-phone"
-                            ></el-button>
+                            <el-button icon="el-icon-phone"></el-button>
                         </template>
                     </el-input>
                 </el-form-item>
@@ -130,7 +128,10 @@ export default {
                     service({
                         method: "post",
                         url: "/sys/login",
-                        data: { name: "Ant" },
+                        data: {
+                            phone_number: param.phonenumber,
+                            password: param.password,
+                        },
                     }).then((response) => console.log(response));
                     localStorage.setItem("ms_username", param.username);
                     router.push("/");
@@ -143,6 +144,26 @@ export default {
 
         const regisiterHandle = () => {
             ElMessage.info("注册...");
+            /* TODO 注意联调
+            login.value.validate((valid) => {
+                if (valid) {
+                    service({
+                        method: "post",
+                        url: "/sys/regisiter",
+                        data: {
+                            username: param.username,
+                            phone_number: param.phonenumber,
+                            password: param.password,
+                        },
+                    }).then((response) => console.log(response));
+                    localStorage.setItem("ms_username", param.username);
+                    router.push("/");
+                } else {
+                    ElMessage.error("登录成功");
+                    return false;
+                }
+            });
+            */
         };
 
         const store = useStore();
