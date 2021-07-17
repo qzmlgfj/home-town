@@ -16,6 +16,10 @@ const routes = [
         redirect: '/admin/dashboard'
     },
     {
+        path: '/',
+        redirect: '/login'
+    },
+    {
         path: "/admin",
         name: "Admin",
         component: Home,
