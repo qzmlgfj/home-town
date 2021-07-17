@@ -2,28 +2,95 @@
     <div class="login-wrap">
         <div class="ms-login">
             <div class="ms-title">后台管理系统</div>
-            <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
-                <el-form-item prop="username">
-                    <el-input v-model="param.username" placeholder="username">
+            <el-form
+                :model="param"
+                :rules="rules"
+                ref="login"
+                label-width="0px"
+                class="ms-content"
+            >
+                <el-form-item prop="phonenumber">
+                    <el-input
+                        v-model="param.phonenumber"
+                        placeholder="手机号码"
+                    >
                         <template #prepend>
-                            <el-button icon="el-icon-user"></el-button>
+                            <el-button icon="el-icon-phone"></el-button>
                         </template>
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="password">
-                    <el-input type="password" placeholder="password" v-model="param.password"
-                        @keyup.enter="submitForm()">
+                    <el-input
+                        type="password"
+                        placeholder="账户密码"
+                        v-model="param.password"
+                        @keyup.enter="loginHandle"
+                    >
                         <template #prepend>
                             <el-button icon="el-icon-lock"></el-button>
                         </template>
                     </el-input>
                 </el-form-item>
                 <div class="login-btn">
-                    <el-button type="primary" @click="submitForm()">登录</el-button>
+                    <el-button type="primary" @click="loginHandle"
+                        >登录</el-button
+                    >
+                    <el-button type="primary" @click="dialogVisible = true"
+                        >注册</el-button
+                    >
                 </div>
                 <p class="login-tips">Tips : 用户名和密码随便填。</p>
             </el-form>
         </div>
+        <el-dialog title="新用户注册" v-model="dialogVisible" width="30%">
+            <el-form
+                :model="param"
+                :rules="rules"
+                ref="login"
+                label-width="0px"
+                class="ms-content"
+            >
+                <el-form-item prop="username">
+                    <el-input v-model="param.username" placeholder="用户姓名">
+                        <template #prepend>
+                            <el-button icon="el-icon-user"></el-button>
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item prop="phonenumber">
+                    <el-input
+                        v-model="param.phonenumber"
+                        placeholder="手机号码"
+                    >
+                        <template #prepend>
+                            <el-button
+                                icon="el-icon-phone"
+                            ></el-button>
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item prop="password">
+                    <el-input
+                        type="password"
+                        placeholder="账户密码"
+                        v-model="param.password"
+                        @keyup.enter="regisiterHandle"
+                    >
+                        <template #prepend>
+                            <el-button icon="el-icon-lock"></el-button>
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <div class="login-btn">
+                    <el-button type="primary" @click="regisiterHandle"
+                        >注册</el-button
+                    >
+                    <el-button type="primary" @click="dialogVisible = false"
+                        >返回</el-button
+                    >
+                </div>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
 
@@ -31,13 +98,15 @@
 import { ref, reactive } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElDialog } from "element-plus";
+import service from "../utils/request";
 
 export default {
     setup() {
         const router = useRouter();
         const param = reactive({
             username: "admin",
+            phonenumber: "123456",
             password: "123123",
         });
 
@@ -54,10 +123,15 @@ export default {
             ],
         };
         const login = ref(null);
-        const submitForm = () => {
+
+        const loginHandle = () => {
             login.value.validate((valid) => {
                 if (valid) {
-                    ElMessage.success("登录成功");
+                    service({
+                        method: "post",
+                        url: "/sys/login",
+                        data: { name: "Ant" },
+                    }).then((response) => console.log(response));
                     localStorage.setItem("ms_username", param.username);
                     router.push("/");
                 } else {
@@ -67,6 +141,10 @@ export default {
             });
         };
 
+        const regisiterHandle = () => {
+            ElMessage.info("注册...");
+        };
+
         const store = useStore();
         store.commit("clearTags");
 
@@ -74,7 +152,13 @@ export default {
             param,
             rules,
             login,
-            submitForm,
+            loginHandle,
+            regisiterHandle,
+        };
+    },
+    data() {
+        return {
+            dialogVisible: false,
         };
     },
 };
@@ -113,7 +197,7 @@ export default {
     text-align: center;
 }
 .login-btn button {
-    width: 100%;
+    width: 45%;
     height: 36px;
     margin-bottom: 10px;
 }
@@ -121,5 +205,13 @@ export default {
     font-size: 12px;
     line-height: 30px;
     color: #fff;
+}
+.rsgisiter-btn {
+    text-align: center;
+}
+.rsgisiter-btn button {
+    width: 45%;
+    height: 36px;
+    margin-bottom: 10px;
 }
 </style>
