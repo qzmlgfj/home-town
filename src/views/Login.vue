@@ -167,7 +167,7 @@ export default {
                             default:
                                 break;
                         }
-                        router.push("/");
+                        router.push("/user");
                     });
                 } else {
                     ElMessage.error("登录失败");

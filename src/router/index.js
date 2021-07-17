@@ -1,18 +1,27 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import Home from "../views/Home.vue";
+import Main from "../views/Main.vue"
 
 const routes = [
     {
-        path: '/',
-        redirect: '/dashboard'
+        path: "/",
+        name: "MainPage",
+        meta: {
+            title: '首页'
+        },
+        component: Main
     },
     {
-        path: "/",
+        path: '/user',
+        redirect: '/user/dashboard'
+    },
+    {
+        path: "/user",
         name: "Home",
         component: Home,
         children: [
             {
-                path: "/dashboard",
+                path: "/user/dashboard",
                 name: "dashboard",
                 meta: {
                     title: '系统首页'
@@ -20,7 +29,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "dashboard" */ "../views/Dashboard.vue")
             },
             {
-                path: "/table",
+                path: "/user/table",
                 name: "basetable",
                 meta: {
                     title: '表格'
@@ -28,7 +37,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "table" */ "../views/BaseTable.vue")
             },
             {
-                path: "/charts",
+                path: "/user/charts",
                 name: "basecharts",
                 meta: {
                     title: '图表'
@@ -36,7 +45,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "charts" */ "../views/BaseCharts.vue")
             },
             {
-                path: "/form",
+                path: "/user/form",
                 name: "baseform",
                 meta: {
                     title: '表单'
@@ -44,7 +53,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "form" */ "../views/BaseForm.vue")
             },
             {
-                path: "/tabs",
+                path: "/user/tabs",
                 name: "tabs",
                 meta: {
                     title: 'tab标签'
@@ -52,7 +61,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "tabs" */ "../views/Tabs.vue")
             },
             {
-                path: "/donate",
+                path: "/user/donate",
                 name: "donate",
                 meta: {
                     title: '鼓励作者'
@@ -60,7 +69,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "donate" */ "../views/Donate.vue")
             },
             {
-                path: "/permission",
+                path: "/user/permission",
                 name: "permission",
                 meta: {
                     title: '权限管理',
@@ -69,7 +78,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "permission" */ "../views/Permission.vue")
             },
             {
-                path: "/i18n",
+                path: "/user/i18n",
                 name: "i18n",
                 meta: {
                     title: '国际化语言'
@@ -77,7 +86,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "i18n" */ "../views/I18n.vue")
             },
             {
-                path: "/upload",
+                path: "/user/upload",
                 name: "upload",
                 meta: {
                     title: '上传插件'
@@ -85,7 +94,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "upload" */ "../views/Upload.vue")
             },
             {
-                path: "/icon",
+                path: "/user/icon",
                 name: "icon",
                 meta: {
                     title: '自定义图标'
@@ -93,7 +102,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "icon" */ "../views/Icon.vue")
             },
             {
-                path: '/404',
+                path: '/user/404',
                 name: '404',
                 meta: {
                     title: '找不到页面'
@@ -101,7 +110,7 @@ const routes = [
                 component: () => import(/* webpackChunkName: "404" */ '../views/404.vue')
             },
             {
-                path: '/403',
+                path: '/user/403',
                 name: '403',
                 meta: {
                     title: '没有权限'
@@ -109,7 +118,7 @@ const routes = [
                 component: () => import(/* webpackChunkName: "403" */ '../views/403.vue')
             },
             {
-                path: '/user',
+                path: '/user/profile',
                 name: 'user',
                 meta: {
                     title: '个人中心'
@@ -117,7 +126,7 @@ const routes = [
                 component: () => import(/* webpackChunkName: "user" */ '../views/User.vue')
             },
             {
-                path: '/editor',
+                path: '/user/editor',
                 name: 'editor',
                 meta: {
                     title: '富文本编辑器'
@@ -144,8 +153,18 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     document.title = `${to.meta.title} | 示范区基层公开监督管理平台`;
     const userName = localStorage.getItem('ms_username');
-    if (!userName && (to.path !== '/login')) {
-        next('/login');
+    if (!userName) {
+        if (to.path === '/login') {
+            console.log("next()");
+            next();
+        }
+        else if (to.path !== '/') {
+            console.log("next('/')");
+            next('/');
+        }
+        else {
+            next();
+        }
     } else if (to.meta.permission) {
         // 如果是管理员权限则可进入，这里只是简单的模拟管理员权限而已
         const userRole = localStorage.getItem('ms_usertype');
