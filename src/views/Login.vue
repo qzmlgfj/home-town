@@ -1,7 +1,7 @@
 <template>
     <div class="login-wrap">
         <div class="ms-login">
-            <div class="ms-title">后台管理系统</div>
+            <div class="ms-title">示范区基层公开监督管理平台</div>
             <el-form
                 :model="param"
                 :rules="rules"
@@ -39,7 +39,6 @@
                         >注册</el-button
                     >
                 </div>
-                <p class="login-tips">Tips : 用户名和密码随便填。</p>
             </el-form>
         </div>
         <el-dialog title="新用户注册" v-model="dialogVisible" width="30%">
