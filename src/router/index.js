@@ -25,7 +25,7 @@ const routes = [
         component: Home,
         children: [
             {
-                path: "/admin/dashboard",
+                path: "dashboard",
                 name: "dashboard",
                 meta: {
                     title: '系统首页'
@@ -33,7 +33,7 @@ const routes = [
                 component: () => import( /* webpackChunkName: "dashboard" */ "../views/Dashboard.vue")
             },
             {
-                path: "/admin/fund",
+                path: "fund",
                 name: "fund",
                 meta: {
                     title: '资金管理'
@@ -41,7 +41,7 @@ const routes = [
                 component: () => import("../views/Fund.vue")
             },
             {
-                path: "/admin/asset",
+                path: "asset",
                 name: "asset",
                 meta: {
                     title: '资产管理'
@@ -49,7 +49,7 @@ const routes = [
                 component: () => import("../views/Asset.vue")
             },
             {
-                path: "/admin/resource",
+                path: "resource",
                 name: "resource",
                 meta: {
                     title: '资源管理'
@@ -57,7 +57,7 @@ const routes = [
                 component: () => import("../views/Resource.vue")
             },
             {
-                path: "/admin/project",
+                path: "project",
                 name: "project",
                 meta: {
                     title: '项目管理'
@@ -65,7 +65,7 @@ const routes = [
                 component: () => import("../views/Project.vue")
             },
             {
-                path: "/admin/earning",
+                path: "earning",
                 name: "earning",
                 meta: {
                     title: '收支管理'
@@ -73,7 +73,7 @@ const routes = [
                 component: () => import("../views/Earning.vue")
             },
             {
-                path: "/admin/contract",
+                path: "contract",
                 name: "contract",
                 meta: {
                     title: '合同管理',
@@ -82,7 +82,7 @@ const routes = [
                 component: () => import("../views/Contract.vue")
             },
             {
-                path: '/admin/404',
+                path: '404',
                 name: '404',
                 meta: {
                     title: '找不到页面'
@@ -90,7 +90,7 @@ const routes = [
                 component: () => import(/* webpackChunkName: "404" */ '../views/404.vue')
             },
             {
-                path: '/admin/403',
+                path: '403',
                 name: '403',
                 meta: {
                     title: '没有权限'
