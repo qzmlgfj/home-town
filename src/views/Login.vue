@@ -103,7 +103,7 @@ export default {
         const router = useRouter();
         const param = reactive({
             username: "",
-            phonenumber: "19982006582",
+            phonenumber: "19982006581",
             password: "123",
         });
 

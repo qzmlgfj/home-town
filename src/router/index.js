@@ -33,77 +33,53 @@ const routes = [
                 component: () => import( /* webpackChunkName: "dashboard" */ "../views/Dashboard.vue")
             },
             {
-                path: "/admin/table",
-                name: "basetable",
+                path: "/admin/fund",
+                name: "fund",
                 meta: {
-                    title: '表格'
+                    title: '资金管理'
                 },
-                component: () => import( /* webpackChunkName: "table" */ "../views/BaseTable.vue")
+                component: () => import("../views/Fund.vue")
             },
             {
-                path: "/admin/charts",
-                name: "basecharts",
+                path: "/admin/asset",
+                name: "asset",
                 meta: {
-                    title: '图表'
+                    title: '资产管理'
                 },
-                component: () => import( /* webpackChunkName: "charts" */ "../views/BaseCharts.vue")
+                component: () => import("../views/Asset.vue")
             },
             {
-                path: "/admin/form",
-                name: "baseform",
+                path: "/admin/resource",
+                name: "resource",
                 meta: {
-                    title: '表单'
+                    title: '资源管理'
                 },
-                component: () => import( /* webpackChunkName: "form" */ "../views/BaseForm.vue")
+                component: () => import("../views/Resource.vue")
             },
             {
-                path: "/admin/tabs",
-                name: "tabs",
+                path: "/admin/project",
+                name: "project",
                 meta: {
-                    title: 'tab标签'
+                    title: '项目管理'
                 },
-                component: () => import( /* webpackChunkName: "tabs" */ "../views/Tabs.vue")
+                component: () => import("../views/Project.vue")
             },
             {
-                path: "/admin/donate",
-                name: "donate",
+                path: "/admin/earning",
+                name: "earning",
                 meta: {
-                    title: '鼓励作者'
+                    title: '收支管理'
                 },
-                component: () => import( /* webpackChunkName: "donate" */ "../views/Donate.vue")
+                component: () => import("../views/Earning.vue")
             },
             {
-                path: "/admin/permission",
-                name: "permission",
+                path: "/admin/contract",
+                name: "contract",
                 meta: {
-                    title: '权限管理',
+                    title: '合同管理',
                     permission: true
                 },
-                component: () => import( /* webpackChunkName: "permission" */ "../views/Permission.vue")
-            },
-            {
-                path: "/admin/i18n",
-                name: "i18n",
-                meta: {
-                    title: '国际化语言'
-                },
-                component: () => import( /* webpackChunkName: "i18n" */ "../views/I18n.vue")
-            },
-            {
-                path: "/admin/upload",
-                name: "upload",
-                meta: {
-                    title: '上传插件'
-                },
-                component: () => import( /* webpackChunkName: "upload" */ "../views/Upload.vue")
-            },
-            {
-                path: "/admin/icon",
-                name: "icon",
-                meta: {
-                    title: '自定义图标'
-                },
-                component: () => import( /* webpackChunkName: "icon" */ "../views/Icon.vue")
+                component: () => import("../views/Contract.vue")
             },
             {
                 path: '/admin/404',
@@ -121,22 +97,6 @@ const routes = [
                 },
                 component: () => import(/* webpackChunkName: "403" */ '../views/403.vue')
             },
-            {
-                path: '/admin/profile',
-                name: 'user',
-                meta: {
-                    title: '个人中心'
-                },
-                component: () => import(/* webpackChunkName: "user" */ '../views/User.vue')
-            },
-            {
-                path: '/admin/editor',
-                name: 'editor',
-                meta: {
-                    title: '富文本编辑器'
-                },
-                component: () => import(/* webpackChunkName: "editor" */ '../views/Editor.vue')
-            }
         ]
     },
     {

@@ -3,24 +3,7 @@
         <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" background-color="#324157"
             text-color="#bfcbd9" active-text-color="#20a0ff" unique-opened router>
             <template v-for="item in items">
-                <template v-if="item.subs">
-                    <el-submenu :index="item.index" :key="item.index">
-                        <template #title>
-                            <i :class="item.icon"></i>
-                            <span>{{ item.title }}</span>
-                        </template>
-                        <template v-for="subItem in item.subs">
-                            <el-submenu v-if="subItem.subs" :index="subItem.index" :key="subItem.index">
-                                <template #title>{{ subItem.title }}</template>
-                                <el-menu-item v-for="(threeItem, i) in subItem.subs" :key="i" :index="threeItem.index">
-                                    {{ threeItem.title }}</el-menu-item>
-                            </el-submenu>
-                            <el-menu-item v-else :index="subItem.index" :key="subItem.index">{{ subItem.title }}
-                            </el-menu-item>
-                        </template>
-                    </el-submenu>
-                </template>
-                <template v-else>
+                <template v-if="item">
                     <el-menu-item :index="item.index" :key="item.index">
                         <i :class="item.icon"></i>
                         <template #title>{{ item.title }}</template>
@@ -44,76 +27,35 @@ export default {
                 title: "系统首页",
             },
             {
-                icon: "el-icon-lx-cascades",
-                index: "/admin/table",
-                title: "基础表格",
+                icon: "el-icon-money",
+                index: "/admin/fund",
+                title: "资金管理",
             },
             {
-                icon: "el-icon-lx-copy",
-                index: "/admin/tabs",
-                title: "tab选项卡",
-            },
-            {
-                icon: "el-icon-lx-calendar",
-                index: "3",
-                title: "表单相关",
-                subs: [
-                    {
-                        index: "/admin/form",
-                        title: "基本表单",
-                    },
-                    {
-                        index: "/admin/upload",
-                        title: "文件上传",
-                    },
-                    {
-                        index: "4",
-                        title: "三级菜单",
-                        subs: [
-                            {
-                                index: "/admin/editor",
-                                title: "富文本编辑器",
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                icon: "el-icon-lx-emoji",
-                index: "/admin/icon",
-                title: "自定义图标",
+                icon: "el-icon-coin",
+                index: "/admin/asset",
+                title: "资产管理",
             },
             {
                 icon: "el-icon-pie-chart",
-                index: "/admin/charts",
-                title: "schart图表",
+                index: "/admin/resource",
+                title: "资源管理"
             },
             {
-                icon: "el-icon-lx-global",
-                index: "/admin/i18n",
-                title: "国际化功能",
+                icon: "el-icon-data-board",
+                index: "/admin/project",
+                title: "项目管理",
             },
             {
-                //TODO 考虑是否需要/admin前缀
-                icon: "el-icon-lx-warn",
-                index: "7",
-                title: "错误处理",
-                subs: [
-                    {
-                        index: "/admin/permission",
-                        title: "权限测试",
-                    },
-                    {
-                        index: "/admin/404",
-                        title: "404页面",
-                    },
-                ],
+                icon: "el-icon-tickets",
+                index: "/admin/earning",
+                title: "收支管理",
             },
             {
-                icon: "el-icon-lx-redpacket_fill",
-                index: "/admin/donate",
-                title: "支持作者",
-            },
+                icon: "el-icon-collection",
+                index: "/admin/contract",
+                title: "合同管理",
+            }
         ];
 
         const route = useRoute();
