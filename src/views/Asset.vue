@@ -39,6 +39,7 @@
             >
                 <el-table-column prop="id" v-show="false"></el-table-column>
                 <el-table-column prop="assetId" label="资产编号"  sortable></el-table-column>
+                <el-table-column prop="type" label="类型"  sortable></el-table-column>
                 <el-table-column prop="assetValue" label="价值" sortable></el-table-column>
                 <el-table-column label="状态" >
                     <template #default="scope">
@@ -48,10 +49,10 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{formatDateTime(scope.row.createTime)}}</template>
+                    <template #default="scope">{{scope.row.createTime}}</template>
                 </el-table-column>
-                <el-table-column prop="updateTime" label="信息更新时间" sortable>
-                    <template #default="scope">{{formatDateTime(scope.row.updateTime)}}</template>
+                <el-table-column prop="updateTime" label="更新时间" sortable>
+                    <template #default="scope">{{scope.row.updateTime}}</template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
@@ -80,14 +81,19 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="项目信息" v-model="editVisible" width="30%"
+        <el-dialog title="资产信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
             <el-form label-width="70px">
                 <el-form-item label="资产编号">
                     <el-input v-model="form.assetId"></el-input>
                 </el-form-item>
+                <el-form-item label="类型">
+                    <el-input v-model="form.type"></el-input>
+                </el-form-item>
                 <el-form-item label="价值">
-                    <el-input v-model="form.assetValue"></el-input>
+                    <el-input v-model="form.assetValue">
+                        <template #prepend>￥</template>
+                    </el-input>
                 </el-form-item>
                 <el-form-item label="状态">
                     <template #default="scope">
@@ -117,19 +123,19 @@ import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 import moment from "_moment@2.29.1@moment";
+import service from "../utils/request";
 
-axios.defaults.baseURL="http://192.168.40.151:8081"
 export default {
     name: "asset-table",
     data() {
         return {
             //状态值
             assetStates: [
-                {assetState: "", type: ''},
-                {assetState: '完成', type: 'success'},
-                {assetState: '状态3', type: 'info'},
-                {assetState: '状态4', type: 'warning'},
-                {assetState: '状态5', type: 'danger'}
+                {assetState: '状态1', type: 'success'},
+                {assetState: '状态2', type: 'info'},
+                {assetState: '状态3', type: 'warning'},
+                {assetState: '状态4', type: 'danger'},
+                {assetState: '状态5', type: ''},
             ],
             /**
              * 搜索选项，选择后value值会绑定到searchOption中
@@ -138,7 +144,6 @@ export default {
             searchOptions : [
                 { value:"asset_id", label : "资产编号"},
                 { value:"asset_value", label : "价值"},
-                { value:"", label : ""},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -148,6 +153,7 @@ export default {
             form:{
                 id:"",
                 assetId:"",
+                type:"",
                 assetValue:"",
                 state:"",
             },
@@ -181,22 +187,20 @@ export default {
          */
             // 从后端获取表格数据
         const getData = () => {
-                axios.post(
-                    "/asset/query",
-                    query
-                ).then(res => {
-                    console.log(res)
-                    if(res.status === 200){
-                        if (res.data.code === 200) {
-                            var data = res.data.data
-                            tableData.value = data.list
-                            pageTotal.value = data.total
-                        }
-                    }
-                }).catch(error => {
-                    ElMessage.error("加载数据失败：" + error)
-                })
-            };
+            service({
+                method : "post",
+                url: "/asset/query",
+                data : query
+            }).then((response) => {
+                if (response.code === 200) {
+                    var data = response.data
+                    tableData.value = data.list
+                    pageTotal.value = data.total
+                }
+            }).catch((error) => {
+                ElMessage.error("加载数据失败：" + error)
+            })
+        };
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
@@ -221,27 +225,23 @@ export default {
         };
     },
     methods:{
-        //时间戳数据格式转换,TimeStamp转'YYYY-MM-DD HH:mm:ss'
-        formatDateTime(timestamp) {
-            return moment(timestamp).format('YYYY-MM-DD HH:mm:ss')
-        },
         //搜索操作
         handleSearch(){
             let query = this.query
             query.fieldName = this.searchOption
             query.fieldValue = this.searchContent
-            axios.post(
-                "/asset/query",
-                query
-            ).then(res => {
-                console.log(res)
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        var data = res.data.data
-                        this.tableData = data.list
-                        this.pageTotal = data.total
-                    }
+            service({
+                method : "post",
+                url : "/asset/query",
+                data : query
+            }).then((response) => {
+                if (response.code === 200) {
+                    var data = response.data
+                    this.tableData = data.list
+                    this.pageTotal = data.total
                 }
+            }).catch((error) =>{
+                ElMessage.error("查询失败:"+error)
             })
         },
         //表格选择项目改变时
@@ -262,23 +262,24 @@ export default {
                 Object.keys(form).forEach((item) => {
                     form[item] = row[item];
                 });
-                axios.post(
-                    "/asset/delete",
-                    form
-                ).then(res => {
-                    if (res.status === 200) {
-                        if (res.data.code === 200) {
-                            ElMessage.success("删除成功");
-                            //此处处理表格变化
-                            this.tableData.splice(index,1)
-                            this.getData();
-                        } else {
-                            ElMessage.error(`删除失败，错误信息:` + res.data.message);
-                        }
+                service({
+                    method : "post",
+                    url : "/asset/delete",
+                    data : form
+                }).then((response) => {
+                    if (response.code === 200) {
+                        ElMessage.success("删除成功");
+                        //此处处理表格变化
+                        this.tableData.splice(index,1)
+                        this.getData();
+                    } else {
+                        ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
-                }).catch(error => {
+                }).catch((error) => {
                     ElMessage.error(`删除失败：` + error);
                 })
+            }).catch((error) => {
+                ElMessage.error(`删除失败：` + error);
             }).catch(() => {
             });
         },
@@ -298,21 +299,22 @@ export default {
             let idx = this.idx
             this.isUpdate = false
             this.editVisible = false
-            axios.post(
-                "/asset/update",
-                form
-            ).then(res => {
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        ElMessage.success(`编辑成功`);
-                        Object.keys(form).forEach((item) => {
-                            this.tableData[idx][item] = form[item];
-                        });
-                    } else {
-                        ElMessage.error(`编辑失败：` + res.data.message);
-                    }
+            service({
+                method : "post",
+                url:"/asset/update",
+                data : form,
+            }).then((response) => {
+                if (response.code === 200) {
+                    ElMessage.success(`编辑成功`);
+                    const data = response.data.list;
+                    //刷新表格
+                    Object.keys(data).forEach((item) => {
+                        this.tableData[idx][item] = data[item];
+                    });
+                } else {
+                    ElMessage.error(`编辑失败：` + response.message);
                 }
-            }).catch(error => {
+            }).catch((error) => {
                 ElMessage.error(`编辑失败：` + error);
             })
         },
@@ -331,17 +333,16 @@ export default {
             let form = this.form
             this.isInsert = false
             this.editVisible = false
-            axios.post(
-                "/asset/insert",
-                form
-            ).then(res => {
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        ElMessage.success(`插入成功`);
-                        this.getData()
-                    }
+            service({
+                method : "post",
+                url : "/asset/insert",
+                data : form
+            }).then((response) => {
+                if (response.code === 200) {
+                    ElMessage.success(`插入成功`);
+                    this.getData()
                 }else {
-                    ElMessage.error(`插入失败：` + res.data.message);
+                    ElMessage.error(`插入失败：` + response.message);
                 }
             }).catch(error => {
                 ElMessage.error(`插入失败：` + error);

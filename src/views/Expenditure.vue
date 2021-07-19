@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i> 项目管理
+                    <i class="el-icon-lx-cascades"></i>收支管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -38,15 +38,13 @@
                       @selection-change="handleTableSelectionChange"
             >
                 <el-table-column prop="id" v-show="false"></el-table-column>
-                <el-table-column prop="projectId" label="项目编号"  sortable></el-table-column>
-                <el-table-column prop="projectName" label="项目名称" sortable></el-table-column>
-                <el-table-column prop="principal" label="负责人" sortable></el-table-column>
-                <el-table-column label="状态" >
-                    <template #default="scope">
-                        <el-tag :type="projectStates.find(item => item.projectState === scope.row.state).type">
-                            {{scope.row.state}}
-                        </el-tag>
-                    </template>
+                <el-table-column prop="itemId" label="编号"  sortable></el-table-column>
+                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="itemName" label="支出名称" sortable></el-table-column>
+                <el-table-column prop="money" label="金额" sortable></el-table-column>
+                <el-table-column prop="itemDate" label="时间" sortable></el-table-column>
+                <el-table-column prop="description" label="备注" sortable>
+                    <template #default="scope">{{scope.row.description}}</template>
                 </el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable>
                     <template #default="scope">{{scope.row.createTime}}</template>
@@ -81,28 +79,34 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="项目信息" v-model="editVisible" width="30%"
+        <el-dialog title="支出信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
             <el-form label-width="70px">
-                <el-form-item label="项目编号">
-                    <el-input v-model="form.projectId"></el-input>
+                <el-form-item label="编号">
+                    <el-input v-model="form.itemId"></el-input>
                 </el-form-item>
-                <el-form-item label="项目名称">
-                    <el-input v-model="form.projectName"></el-input>
+                <el-form-item label="收入类型">
+                    <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="负责人">
-                    <el-input v-model="form.principal"></el-input>
+                <el-form-item label="名称">
+                    <el-input v-model="form.itemName"></el-input>
                 </el-form-item>
-                <el-form-item label="状态">
-                    <template #default="scope">
-                        <el-select v-model="form.state" :placeholder="form.state">
-                            <el-option
-                                v-for="item in projectStates"
-                                :value="item.projectState">
-                                {{item.projectState}}
-                            </el-option>
-                        </el-select>
-                    </template>
+                <el-form-item label="金额">
+                    <el-input v-model="form.money">
+                        <template #prepend>￥</template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="结束日期">
+                    <el-date-picker
+                        v-model="form.itemDate"
+                        type="date"
+                        format="YYYY 年 MM 月 DD 日"
+                        placeholder="请选择事件"
+                        value-format="YYYY-MM-DD">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input v-model="form.description"></el-input>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -122,27 +126,19 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 import moment from "_moment@2.29.1@moment";
 import service from "../utils/request";
-
 export default {
-    name: "project",
+    name: "earning-table",
     data() {
         return {
-            //状态值
-            projectStates: [
-                {projectState: '状态1', type: 'success'},
-                {projectState: '状态2', type: 'info'},
-                {projectState: '状态3', type: 'warning'},
-                {projectState: '状态4', type: 'danger'},
-                {projectState: '状态5', type: ''},
-            ],
             /**
              * 搜索选项，选择后value值会绑定到searchOption中
              * value值为数据库字段值,有空字段是为了全部查询用
              */
             searchOptions : [
-                { value:"project_id", label : "项目编号"},
-                { value:"project_name", label : "项目名称"},
-                { value:"principal", label : "负责人"},
+                { value:"item_id", label : "编号"},
+                { value:"item_name", label : "名称"},
+                { value:"money", label : "金额"},
+                { value:"description", label : "备注"},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -151,10 +147,12 @@ export default {
             //表单数据
             form:{
                 id:"",
-                projectId:"",
-                projectName:"",
-                principal:"",
-                state:"",
+                itemId:"",
+                itemName:"",
+                money:"",
+                itemDate:"",
+                type:"",
+                description:"",
             },
             //用户点击的表格行索引
             idx : -1,
@@ -188,11 +186,12 @@ export default {
         const getData = () => {
                 service({
                     method : "post",
-                    url : "/project/query",
-                    data: query
+                    url: "/expenditure/query",
+                    data : query
                 }).then((response) => {
                     if (response.code === 200) {
                         var data = response.data
+                        console.log(data.list)
                         tableData.value = data.list
                         pageTotal.value = data.total
                     }
@@ -231,7 +230,7 @@ export default {
             query.fieldValue = this.searchContent
             service({
                 method : "post",
-                url : "/project/query",
+                url : "/expenditure/query",
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
@@ -239,8 +238,6 @@ export default {
                     this.tableData = data.list
                     this.pageTotal = data.total
                 }
-            }).catch((error) => {
-                ElMessage("查询失败"+error)
             })
         },
         //表格选择项目改变时
@@ -263,7 +260,7 @@ export default {
                 });
                 service({
                     method : "post",
-                    url : "/project/delete",
+                    url : "/expenditure/delete",
                     data : form
                 }).then((response) => {
                     if (response.code === 200) {
@@ -299,21 +296,19 @@ export default {
             this.editVisible = false
             service({
                 method : "post",
-                url:"/project/update",
+                url:"/expenditure/update",
                 data : form,
             }).then((response) => {
-                    if (response.code === 200) {
-                        console.log(response.data)
-                        const data = response.data.list;
-                        //刷新表格
-                        Object.keys(data).forEach((item) => {
-                            this.tableData[idx][item] = data[item];
-                        });
-                        ElMessage.success(`编辑成功`);
-
-                    } else {
-                        ElMessage.error(`编辑失败：` + response.message);
-                    }
+                if (response.code === 200) {
+                    ElMessage.success(`编辑成功`);
+                    const data = response.data.list;
+                    //刷新表格
+                    Object.keys(data).forEach((item) => {
+                        this.tableData[idx][item] = data[item];
+                    });
+                } else {
+                    ElMessage.error(`编辑失败：` + response.message);
+                }
             }).catch((error) => {
                 ElMessage.error(`编辑失败：` + error);
             })
@@ -335,7 +330,7 @@ export default {
             this.editVisible = false
             service({
                 method : "post",
-                url : "/project/insert",
+                url : "/expenditure/insert",
                 data : form
             }).then((response) => {
                 if (response.code === 200) {

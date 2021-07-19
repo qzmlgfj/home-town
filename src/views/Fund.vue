@@ -37,14 +37,15 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="id" v-show="false"></el-table-column>
+                <el-table-column prop="id" sortable></el-table-column>
                 <el-table-column prop="fundId" label="资金编号"  sortable></el-table-column>
-                <el-table-column prop="fundValue" label="价值" sortable></el-table-column>
+                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="fundValue" label="金额" sortable></el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{formatDateTime(scope.row.createTime)}}</template>
+                    <template #default="scope">{{scope.row.createTime}}</template>
                 </el-table-column>
-                <el-table-column prop="updateTime" label="信息更新时间" sortable>
-                    <template #default="scope">{{formatDateTime(scope.row.updateTime)}}</template>
+                <el-table-column prop="updateTime" label="更新时间" sortable>
+                    <template #default="scope">{{scope.row.updateTime}}</template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
@@ -79,8 +80,13 @@
                 <el-form-item label="资金编号">
                     <el-input v-model="form.fundId"></el-input>
                 </el-form-item>
-                <el-form-item label="价值">
-                    <el-input v-model="form.fundValue"></el-input>
+                <el-form-item label="类型">
+                    <el-input v-model="form.type"></el-input>
+                </el-form-item>
+                <el-form-item label="金额">
+                    <el-input v-model="form.fundValue">
+                        <template #prepend>￥</template>
+                    </el-input>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -99,8 +105,8 @@ import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 import moment from "_moment@2.29.1@moment";
+import service from "../utils/request";
 
-axios.defaults.baseURL="http://192.168.40.151:8081"
 export default {
     name: "fund-table",
     data() {
@@ -110,9 +116,8 @@ export default {
              * value值为数据库字段值,有空字段是为了全部查询用
              */
             searchOptions : [
-                { value:"asset_id", label : "资金编号"},
-                { value:"asset_value", label : "价值"},
-                { value:"", label : ""},
+                { value:"fund_id", label : "资金编号"},
+                { value:"fund_value", label : "金额"},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -123,6 +128,7 @@ export default {
                 id:"",
                 fundId:"",
                 fundValue:"",
+                type:"",
             },
             //用户点击的表格行索引
             idx : -1,
@@ -154,19 +160,17 @@ export default {
          */
             // 从后端获取表格数据
         const getData = () => {
-                axios.post(
-                    "/fund/query",
-                    query
-                ).then(res => {
-                    console.log(res)
-                    if(res.status === 200){
-                        if (res.data.code === 200) {
-                            var data = res.data.data
-                            tableData.value = data.list
-                            pageTotal.value = data.total
-                        }
+                service({
+                    method : "post",
+                    url : "/fund/query",
+                    data: query
+                }).then((response) => {
+                    if (response.code === 200) {
+                        var data = response.data
+                        tableData.value = data.list
+                        pageTotal.value = data.total
                     }
-                }).catch(error => {
+                }).catch((error) => {
                     ElMessage.error("加载数据失败：" + error)
                 })
             };
@@ -194,27 +198,23 @@ export default {
         };
     },
     methods:{
-        //时间戳数据格式转换,TimeStamp转'YYYY-MM-DD HH:mm:ss'
-        formatDateTime(timestamp) {
-            return moment(timestamp).format('YYYY-MM-DD HH:mm:ss')
-        },
         //搜索操作
         handleSearch(){
             let query = this.query
             query.fieldName = this.searchOption
             query.fieldValue = this.searchContent
-            axios.post(
-                "/fund/query",
-                query
-            ).then(res => {
-                console.log(res)
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        var data = res.data.data
-                        this.tableData = data.list
-                        this.pageTotal = data.total
-                    }
+            service({
+                method : "post",
+                url : "/fund/query",
+                data : query
+            }).then((response) => {
+                if (response.code === 200) {
+                    var data = response.data
+                    this.tableData = data.list
+                    this.pageTotal = data.total
                 }
+            }).catch((error) => {
+                ElMessage("查询失败"+error)
             })
         },
         //表格选择项目改变时
@@ -235,24 +235,24 @@ export default {
                 Object.keys(form).forEach((item) => {
                     form[item] = row[item];
                 });
-                axios.post(
-                    "/fund/delete",
-                    form
-                ).then(res => {
-                    if (res.status === 200) {
-                        if (res.data.code === 200) {
-                            ElMessage.success("删除成功");
-                            //此处处理表格变化
-                            this.tableData.splice(index,1)
-                            this.getData();
-                        } else {
-                            ElMessage.error(`删除失败，错误信息:` + res.data.message);
-                        }
+                service({
+                    method : "post",
+                    url : "/fund/delete",
+                    data : form
+                }).then((response) => {
+                    if (response.code === 200) {
+                        ElMessage.success("删除成功");
+                        //此处处理表格变化
+                        this.tableData.splice(index,1)
+                        this.getData();
+                    } else {
+                        ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
-                }).catch(error => {
+                }).catch((error) => {
                     ElMessage.error(`删除失败：` + error);
                 })
-            }).catch(() => {
+            }).catch((error) => {
+                ElMessage.error(`删除失败：` + error);
             });
         },
         //处理保存动作
@@ -260,7 +260,7 @@ export default {
             this.idx = index;
             let form = this.form
             Object.keys(form).forEach((item) => {
-                form[item] = row[item];
+                    form[item] = row[item];
             });
             this.isUpdate = true
             this.editVisible = true
@@ -271,21 +271,22 @@ export default {
             let idx = this.idx
             this.isUpdate = false
             this.editVisible = false
-            axios.post(
-                "/fund/update",
-                form
-            ).then(res => {
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        ElMessage.success(`编辑成功`);
-                        Object.keys(form).forEach((item) => {
-                            this.tableData[idx][item] = form[item];
-                        });
-                    } else {
-                        ElMessage.error(`编辑失败：` + res.data.message);
-                    }
+            service({
+                method : "post",
+                url:"/fund/update",
+                data : form,
+            }).then((response) => {
+                if (response.code === 200) {
+                    ElMessage.success(`编辑成功`);
+                    const data = response.data.list;
+                    //刷新表格
+                    Object.keys(data).forEach((item) => {
+                        this.tableData[idx][item] = data[item];
+                    });
+                } else {
+                    ElMessage.error(`编辑失败：` + response.message);
                 }
-            }).catch(error => {
+            }).catch((error) => {
                 ElMessage.error(`编辑失败：` + error);
             })
         },
@@ -304,17 +305,17 @@ export default {
             let form = this.form
             this.isInsert = false
             this.editVisible = false
-            axios.post(
-                "/fund/insert",
-                form
-            ).then(res => {
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        ElMessage.success(`插入成功`);
-                        this.getData()
-                    }
+            service({
+                method : "post",
+                url : "/fund/insert",
+                data : form
+            }).then((response) => {
+                console.log(response)
+                if (response.code === 200) {
+                    ElMessage.success(`插入成功`);
+                    this.getData()
                 }else {
-                    ElMessage.error(`插入失败：` + res.data.message);
+                    ElMessage.error(`插入失败：` + response.message);
                 }
             }).catch(error => {
                 ElMessage.error(`插入失败：` + error);

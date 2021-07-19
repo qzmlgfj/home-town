@@ -39,22 +39,18 @@
             >
                 <el-table-column prop="id" v-show="false"></el-table-column>
                 <el-table-column prop="itemId" label="编号"  sortable></el-table-column>
-                <el-table-column prop="itemName" label="名称" sortable></el-table-column>
+                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="itemName" label="收入名称" sortable></el-table-column>
                 <el-table-column prop="money" label="金额" sortable></el-table-column>
-                //
-                <el-date-picker
-                    v-model="value1"
-                    type="date"
-                    placeholder="Pick a date"
-                ></el-date-picker>
-                    <el-table-column prop="description" label="描述" sortable>
-                    <template #default="scope">{{formatDateTime(scope.row.itemDate)}}</template>
+                <el-table-column prop="itemDate" label="时间" sortable></el-table-column>
+                    <el-table-column prop="description" label="备注" sortable>
+                    <template #default="scope">{{scope.row.description}}</template>
                 </el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{formatDateTime(scope.row.createTime)}}</template>
+                    <template #default="scope">{{scope.row.createTime}}</template>
                 </el-table-column>
-                <el-table-column prop="updateTime" label="信息更新时间" sortable>
-                    <template #default="scope">{{formatDateTime(scope.row.updateTime)}}</template>
+                <el-table-column prop="updateTime" label="更新时间" sortable>
+                    <template #default="scope">{{scope.row.updateTime}}</template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
@@ -83,19 +79,33 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="资金信息" v-model="editVisible" width="30%"
+        <el-dialog title="收入信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
             <el-form label-width="70px">
                 <el-form-item label="编号">
                     <el-input v-model="form.itemId"></el-input>
                 </el-form-item>
+                <el-form-item label="收入类型">
+                    <el-input v-model="form.type"></el-input>
+                </el-form-item>
                 <el-form-item label="名称">
                     <el-input v-model="form.itemName"></el-input>
                 </el-form-item>
                 <el-form-item label="金额">
-                    <el-input v-model="form.money"></el-input>
+                    <el-input v-model="form.money">
+                        <template #prepend>￥</template>
+                    </el-input>
                 </el-form-item>
-                <el-form-item label="描述">
+                <el-form-item label="时间">
+                    <el-date-picker
+                        v-model="form.itemDate"
+                        type="date"
+                        format="YYYY 年 MM 月 DD 日"
+                        placeholder="请选择事件"
+                        value-format="YYYY-MM-DD">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="备注">
                     <el-input v-model="form.description"></el-input>
                 </el-form-item>
             </el-form>
@@ -115,8 +125,7 @@ import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 import moment from "_moment@2.29.1@moment";
-
-axios.defaults.baseURL="http://192.168.40.151:8081"
+import service from "../utils/request";
 export default {
     name: "earning-table",
     data() {
@@ -129,8 +138,7 @@ export default {
                 { value:"item_id", label : "编号"},
                 { value:"item_name", label : "名称"},
                 { value:"money", label : "金额"},
-                { value:"description", label : "描述"},
-                { value:"", label : ""},
+                { value:"description", label : "备注"},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -142,7 +150,9 @@ export default {
                 itemId:"",
                 itemName:"",
                 money:"",
-                description:""
+                itemDate:"",
+                type:"",
+                description:"",
             },
             //用户点击的表格行索引
             idx : -1,
@@ -174,19 +184,18 @@ export default {
          */
             // 从后端获取表格数据
         const getData = () => {
-                axios.post(
-                    "/earning/query",
-                    query
-                ).then(res => {
-                    console.log(res)
-                    if(res.status === 200){
-                        if (res.data.code === 200) {
-                            var data = res.data.data
-                            tableData.value = data.list
-                            pageTotal.value = data.total
-                        }
+                service({
+                    method : "post",
+                    url: "/earning/query",
+                    data : query
+                }).then((response) => {
+                    if (response.code === 200) {
+                        var data = response.data
+                        console.log(data.list)
+                        tableData.value = data.list
+                        pageTotal.value = data.total
                     }
-                }).catch(error => {
+                }).catch((error) => {
                     ElMessage.error("加载数据失败：" + error)
                 })
             };
@@ -214,29 +223,20 @@ export default {
         };
     },
     methods:{
-        //时间戳数据格式转换,TimeStamp转'YYYY-MM-DD HH:mm:ss'
-        formatDateTime(timestamp) {
-            return moment(timestamp).format('YYYY-MM-DD HH:mm:ss')
-        },
-        formatDate(timestamp) {
-            return moment(timestamp).format('YYYY-MM-DD')
-        },
         //搜索操作
         handleSearch(){
             let query = this.query
             query.fieldName = this.searchOption
             query.fieldValue = this.searchContent
-            axios.post(
-                "/earning/query",
-                query
-            ).then(res => {
-                console.log(res)
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        var data = res.data.data
-                        this.tableData = data.list
-                        this.pageTotal = data.total
-                    }
+            service({
+                method : "post",
+                url : "/earning/query",
+                data : query
+            }).then((response) => {
+                if (response.code === 200) {
+                    var data = response.data
+                    this.tableData = data.list
+                    this.pageTotal = data.total
                 }
             })
         },
@@ -258,24 +258,24 @@ export default {
                 Object.keys(form).forEach((item) => {
                     form[item] = row[item];
                 });
-                axios.post(
-                    "/earning/delete",
-                    form
-                ).then(res => {
-                    if (res.status === 200) {
-                        if (res.data.code === 200) {
-                            ElMessage.success("删除成功");
-                            //此处处理表格变化
-                            this.tableData.splice(index,1)
-                            this.getData();
-                        } else {
-                            ElMessage.error(`删除失败，错误信息:` + res.data.message);
-                        }
+                service({
+                    method : "post",
+                    url : "/contract/delete",
+                    data : form
+                }).then((response) => {
+                    if (response.code === 200) {
+                        ElMessage.success("删除成功");
+                        //此处处理表格变化
+                        this.tableData.splice(index,1)
+                        this.getData();
+                    } else {
+                        ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
-                }).catch(error => {
+                }).catch((error) => {
                     ElMessage.error(`删除失败：` + error);
                 })
-            }).catch(() => {
+            }).catch((error) => {
+                ElMessage.error(`删除失败：` + error);
             });
         },
         //处理保存动作
@@ -294,21 +294,22 @@ export default {
             let idx = this.idx
             this.isUpdate = false
             this.editVisible = false
-            axios.post(
-                "/earning/update",
-                form
-            ).then(res => {
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        ElMessage.success(`编辑成功`);
-                        Object.keys(form).forEach((item) => {
-                            this.tableData[idx][item] = form[item];
-                        });
-                    } else {
-                        ElMessage.error(`编辑失败：` + res.data.message);
-                    }
+            service({
+                method : "post",
+                url:"/earning/update",
+                data : form,
+            }).then((response) => {
+                if (response.code === 200) {
+                    ElMessage.success(`编辑成功`);
+                    const data = response.data.list;
+                    //刷新表格
+                    Object.keys(data).forEach((item) => {
+                        this.tableData[idx][item] = data[item];
+                    });
+                } else {
+                    ElMessage.error(`编辑失败：` + response.message);
                 }
-            }).catch(error => {
+            }).catch((error) => {
                 ElMessage.error(`编辑失败：` + error);
             })
         },
@@ -327,17 +328,16 @@ export default {
             let form = this.form
             this.isInsert = false
             this.editVisible = false
-            axios.post(
-                "/fund/insert",
-                form
-            ).then(res => {
-                if (res.status === 200) {
-                    if (res.data.code === 200) {
-                        ElMessage.success(`插入成功`);
-                        this.getData()
-                    }
+            service({
+                method : "post",
+                url : "/earning/insert",
+                data : form
+            }).then((response) => {
+                if (response.code === 200) {
+                    ElMessage.success(`插入成功`);
+                    this.getData()
                 }else {
-                    ElMessage.error(`插入失败：` + res.data.message);
+                    ElMessage.error(`插入失败：` + response.message);
                 }
             }).catch(error => {
                 ElMessage.error(`插入失败：` + error);
