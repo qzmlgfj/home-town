@@ -41,6 +41,14 @@ const routes = [
                 component: () => import("../views/Fund.vue")
             },
             {
+                path: "fund",
+                name: "fund",
+                meta: {
+                    title: '资金管理'
+                },
+                component: () => import("../views/Fund.vue")
+            },
+            {
                 path: "asset",
                 name: "asset",
                 meta: {
@@ -68,9 +76,17 @@ const routes = [
                 path: "earning",
                 name: "earning",
                 meta: {
-                    title: '收支管理'
+                    title: '收入管理'
                 },
                 component: () => import("../views/Earning.vue")
+            },
+            {
+                path: "expenditure",
+                name: "expenditure",
+                meta: {
+                    title: '支出管理'
+                },
+                component: () => import("../views/Expenditure.vue")
             },
             {
                 path: "contract",
