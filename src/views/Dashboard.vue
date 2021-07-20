@@ -122,7 +122,7 @@ export default {
     components: { Schart },
     setup() {
         const name = localStorage.getItem("ms_username");
-        const role = name === "admin" ? "超级管理员" : "普通用户";
+        const role = localStorage.getItem("ms_usertype") === "admin" ? "管理员" : "普通用户";
 
         const data = reactive([
             {

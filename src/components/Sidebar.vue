@@ -1,7 +1,7 @@
 <template>
     <div class="sidebar">
         <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" background-color="#324157"
-            text-color="#bfcbd9" active-text-color="#20a0ff" unique-opened router>
+                 text-color="#bfcbd9" active-text-color="#20a0ff" :unique-opened=true router>
             <template v-for="item in items">
                 <template v-if="item.subs">
                     <el-submenu :index="item.index" :key="item.index">
@@ -42,78 +42,54 @@ export default {
                 icon: "el-icon-lx-home",
                 index: "/admin/dashboard",
                 title: "系统首页",
-            },
-            {
-                icon: "el-icon-lx-cascades",
-                index: "/admin/table",
-                title: "基础表格",
-            },
-            {
-                icon: "el-icon-lx-copy",
-                index: "/admin/tabs",
-                title: "tab选项卡",
-            },
-            {
-                icon: "el-icon-lx-calendar",
-                index: "3",
-                title: "表单相关",
-                subs: [
+            }, {
+                icon: "el-icon-money",
+                index: "1",
+                title: "三资管理",
+                subs:[
                     {
-                        index: "/admin/form",
-                        title: "基本表单",
+                        icon: "el-icon-money",
+                        index: "/admin/fund",
+                        title: "资金管理",
                     },
                     {
-                        index: "/admin/upload",
-                        title: "文件上传",
+                        icon: "el-icon-coin",
+                        index: "/admin/asset",
+                        title: "资产管理",
                     },
                     {
-                        index: "4",
-                        title: "三级菜单",
-                        subs: [
-                            {
-                                index: "/admin/editor",
-                                title: "富文本编辑器",
-                            },
-                        ],
+                        icon: "el-icon-pie-chart",
+                        index: "/admin/resource",
+                        title: "资源管理"
                     },
-                ],
+                ]
             },
             {
-                icon: "el-icon-lx-emoji",
-                index: "/admin/icon",
-                title: "自定义图标",
+                icon: "el-icon-data-board",
+                index: "/admin/project",
+                title: "项目管理",
             },
             {
-                icon: "el-icon-pie-chart",
-                index: "/admin/charts",
-                title: "schart图表",
-            },
-            {
-                icon: "el-icon-lx-global",
-                index: "/admin/i18n",
-                title: "国际化功能",
-            },
-            {
-                //TODO 考虑是否需要/admin前缀
-                icon: "el-icon-lx-warn",
-                index: "7",
-                title: "错误处理",
-                subs: [
+                icon: "el-icon-tickets",
+                index: "2",
+                title: "收支管理",
+                subs:[
                     {
-                        index: "/admin/permission",
-                        title: "权限测试",
+                        icon: "el-icon-tickets",
+                        index: "/admin/earning",
+                        title: "收入管理",
+                    }, {
+                        icon: "el-icon-tickets",
+                        index: "/admin/expenditure",
+                        title: "支出管理",
                     },
-                    {
-                        index: "/admin/404",
-                        title: "404页面",
-                    },
-                ],
+                ]
             },
             {
-                icon: "el-icon-lx-redpacket_fill",
-                index: "/admin/donate",
-                title: "支持作者",
-            },
+                icon: "el-icon-collection",
+                index: "/admin/contract",
+                title: "合同管理",
+            }
         ];
 
         const route = useRoute();
@@ -147,7 +123,7 @@ export default {
     width: 0;
 }
 .sidebar-el-menu:not(.el-menu--collapse) {
-    width: 250px;
+    width: 140px;
 }
 .sidebar > ul {
     height: 100%;
