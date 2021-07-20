@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i>收支管理
+                    <i class="el-icon-lx-cascades"></i>支出管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -45,6 +45,7 @@
                     @click="handleInsert"
                     >新增</el-button
                 >
+                <el-button @click="isDrawerVisible = true" type="success">查看报表</el-button>
             </div>
             <!--表格区-->
             <el-table
@@ -56,25 +57,19 @@
                 highlight-current-row
                 @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="itemId" label="编号"  sortable></el-table-column>
-                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="itemId" label="支出编号"  sortable></el-table-column>
+                <el-table-column prop="type" label="支出类型" sortable></el-table-column>
                 <el-table-column prop="itemName" label="支出名称" sortable></el-table-column>
                 <el-table-column prop="money" label="金额" sortable></el-table-column>
-                <el-table-column prop="itemDate" label="时间" sortable></el-table-column>
+                <el-table-column prop="itemDate" label="日期" sortable></el-table-column>
                 <el-table-column prop="description" label="备注" sortable>
-                    <template #default="scope">{{
-                        scope.row.description
-                    }}</template>
+                    <template #default="scope">{{scope.row.description }}</template>
                 </el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{
-                        scope.row.createTime
-                    }}</template>
+                    <template #default="scope">{{scope.row.createTime }}</template>
                 </el-table-column>
                 <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{
-                        scope.row.updateTime
-                    }}</template>
+                    <template #default="scope">{{scope.row.updateTime }}</template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
@@ -107,28 +102,28 @@
             </div>
         </div>
 
-        <el-row :gutter="20">
-            <el-col :span="10">
-                <el-card shadow="hover">
-                    <div class="queryMonth">
-                        <span style="margin: 10px">选择月份</span>
-                        <el-input-number
-                            v-model="queryChartData.month"
-                            controls-position="right"
-                            :min="1"
-                            :max="12"
-                            @change="updateChart"
-                        ></el-input-number>
-                    </div>
-                    <schart
-                        class="schart"
-                        canvasId="canvas"
-                        :options="chartData"
-                        :key="chartKey"
-                    />
-                </el-card>
-            </el-col>
-        </el-row>
+        <el-drawer
+            title="支出图表"
+            v-model="isDrawerVisible"
+            :direction="rtl"
+            :before-close="handleDrawerClose" destroy-on-close>
+            <div class="queryMonth">
+                <span style="margin: 10px">选择月份</span>
+                <el-input-number
+                    v-model="queryChartData.month"
+                    controls-position="right"
+                    :min="1"
+                    :max="12"
+                    @change="updateChart"
+                ></el-input-number>
+            </div>
+            <schart
+                class="schart"
+                canvasId="canvas"
+                :options="chartData"
+                :key="chartKey"
+            />
+        </el-drawer>
 
         <!-- 编辑弹出框 -->
         <el-dialog
@@ -137,22 +132,22 @@
             width="30%"
             @closed="handleDialogClosed"
         >
-            <el-form label-width="70px">
-                <el-form-item label="编号">
-                    <el-input v-model="form.itemId"></el-input>
+            <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
+                <el-form-item label="支出编号" >
+                    <el-input v-model.number="form.itemId"></el-input>
                 </el-form-item>
-                <el-form-item label="收入类型">
+                <el-form-item label="支出类型">
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="名称">
+                <el-form-item label="支出名称">
                     <el-input v-model="form.itemName"></el-input>
                 </el-form-item>
                 <el-form-item label="金额">
-                    <el-input v-model="form.money">
+                    <el-input v-model.number="form.money">
                         <template #prepend>￥</template>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="结束日期">
+                <el-form-item label="日期">
                     <el-date-picker
                         v-model="form.itemDate"
                         type="date"
@@ -171,13 +166,13 @@
                     <el-button
                         v-if="isUpdate"
                         type="primary"
-                        @click="saveUpdate"
+                        @click="saveUpdate('form')"
                         >确 定</el-button
                     >
                     <el-button
                         v-if="isInsert"
                         type="primary"
-                        @click="saveInsert"
+                        @click="saveInsert('form')"
                         >确 定</el-button
                     >
                 </span>
@@ -204,8 +199,8 @@ export default {
              * value值为数据库字段值,有空字段是为了全部查询用
              */
             searchOptions: [
-                { value: "item_id", label: "编号" },
-                { value: "item_name", label: "名称" },
+                { value: "item_id", label: "支出编号" },
+                { value: "item_name", label: "支出名称" },
                 { value: "money", label: "金额" },
                 { value: "description", label: "备注" },
             ],
@@ -223,6 +218,25 @@ export default {
                 type: "",
                 description: "",
             },
+            formRules : {
+                itemId: [
+                    { required: true, message: '支出编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '支出编号只能为数字', trigger: 'change' },
+                ],
+                itemName: [
+                    { required: true, message: '请选择资产状态', trigger: 'change' },
+                ],
+                type: [
+                    { required: true, message: '资产类型不能为空', trigger: 'blur' },
+                ],
+                itemDate:[
+                    { required:true, message:'请选择日期',trigger: 'blur'}
+                ],
+                money:[
+                    { required:true, message:'请输入金额',trigger: 'blur'},
+                    { type: 'number', message: '请输入数字', trigger: 'change' },
+                ],
+            },
             //用户点击的表格行索引
             idx: -1,
             // 标明为插入操作
@@ -231,6 +245,7 @@ export default {
             isUpdate: false,
             // 表单是否可见
             editVisible: false,
+            isDrawerVisible:false,
         };
     },
     setup() {
@@ -276,33 +291,30 @@ export default {
          * 方法区
          */
         // 从后端获取表格数据
-        const getData = () => {
+        const getTableData = () => {
             service({
                 method: "post",
                 url: "/expenditure/query",
                 data: query,
-            })
-                .then((response) => {
-                    if (response.code === 200) {
-                        var data = response.data;
-                        console.log(data.list);
-                        tableData.value = data.list;
-                        pageTotal.value = data.total;
-                    }
-                })
-                .catch((error) => {
-                    ElMessage.error("加载数据失败：" + error);
-                });
+            }).then((response) => {
+                if (response.code === 200) {
+                    const data = response.data;
+                    tableData.value = data.list;
+                    pageTotal.value = data.total;
+                }
+            }).catch((error) => {
+                ElMessage.error("加载数据失败：" + error);
+            });
         };
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
-            getData();
+            getTableData();
         };
         // 页面大小改变操作
         const handleSizeChange = (val) => {
             query.pageSize = val;
-            getData();
+            getTableData();
         };
         // 获取当前年月
         const getYearMonth = () => {
@@ -329,7 +341,7 @@ export default {
         /**
          * 执行区，初始化时执行的方法
          */
-        getData();
+        getTableData();
         getYearMonth();
         updateChart();
         return {
@@ -339,7 +351,7 @@ export default {
             queryChartData,
             chartData,
             chartKey,
-            getData,
+            getTableData,
             handleSizeChange,
             handlePageChange,
             updateChart,
@@ -357,7 +369,7 @@ export default {
                 data: query,
             }).then((response) => {
                 if (response.code === 200) {
-                    var data = response.data;
+                    const data = response.data;
                     this.tableData = data.list;
                     this.pageTotal = data.total;
                 }
@@ -374,12 +386,10 @@ export default {
         },
         // 删除操作
         handleDelete(index, row) {
-            let form = this.form;
+            const form = JSON.parse(JSON.stringify(this.form));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                //填充表单数据
-                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/expenditure/delete",
@@ -389,7 +399,8 @@ export default {
                         ElMessage.success("删除成功");
                         //此处处理表格变化
                         this.tableData.splice(index,1)
-                        this.getData();
+                        this.getTableData();
+                        this.updateChart();
                     } else {
                         ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
@@ -401,51 +412,40 @@ export default {
         //处理保存动作
         handleUpdate(index, row) {
             this.idx = index;
-            this.form = this.tableData[index];
+            this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
-        saveUpdate(){
-            //必须先保存用户点击的索引
-            let idx = this.idx
-            let form = this.form
-            this.isUpdate = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url:"/expenditure/update",
-                data : form,
-            }).then((response) => {
-                if (response.code === 200) {
-                    ElMessage.success(`编辑成功`);
-                    //刷新表格
-                    this.tableData[idx] = response.data.list;
-                } else {
-                    ElMessage.error(`编辑失败：` + response.message);
+        saveUpdate(formName){
+            this.$refs[formName].validate((valid) => {
+                if(valid){
+                    const form = JSON.parse(JSON.stringify(this.form));
+                    let idx = this.clickedIndex
+                    this.isUpdate = false
+                    this.editVisible = false
+                    service({
+                        method : "post",
+                        url:"/expenditure/update",
+                        data : form,
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`编辑成功`);
+                            //刷新表格
+                            this.tableData[idx] = response.data.list;
+                            this.updateChart();
+                        } else {
+                            ElMessage.error(`编辑失败：` + response.message);
+                        }
+                    }).catch((error) => {
+                        ElMessage.error(`编辑失败：` + error);
+                    })
                 }
-            }).catch((error) => {
-                ElMessage.error(`编辑失败：` + error);
             })
-                .then((response) => {
-                    if (response.code === 200) {
-                        ElMessage.success(`编辑成功`);
-                        const data = response.data.list;
-                        //刷新表格
-                        Object.keys(data).forEach((item) => {
-                            this.tableData[idx][item] = data[item];
-                        });
-                    } else {
-                        ElMessage.error(`编辑失败：` + response.message);
-                    }
-                })
-                .catch((error) => {
-                    ElMessage.error(`编辑失败：` + error);
-                });
         },
         //处理新增操作
         handleInsert() {
-            let form = this.form;
+            const form = JSON.parse(JSON.stringify(this.form));;
             //清空表单
             Object.keys(form).forEach((item) => {
                 form[item] = "";
@@ -454,26 +454,28 @@ export default {
             this.editVisible = true;
         },
         // 保存新增数据到后端
-        saveInsert() {
-            let form = this.form;
-            this.isInsert = false;
-            this.editVisible = false;
-            service({
-                method: "post",
-                url: "/expenditure/insert",
-                data: form,
-            })
-                .then((response) => {
-                    if (response.code === 200) {
-                        ElMessage.success(`插入成功`);
-                        this.getData();
-                    } else {
-                        ElMessage.error(`插入失败：` + response.message);
-                    }
-                })
-                .catch((error) => {
-                    ElMessage.error(`插入失败：` + error);
-                });
+        saveInsert(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    this.isInsert = false
+                    this.editVisible = false
+                    service({
+                        method: "post",
+                        url: "/expenditure/insert",
+                        data: this.form
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`插入成功`);
+                            this.getTableData()
+                            this.updateChart();
+                        } else {
+                            ElMessage.error(`插入失败：` + response.message);
+                        }
+                    }).catch(error => {
+                        ElMessage.error(`插入失败：` + error);
+                    })
+                }
+            });
         },
     },
 };

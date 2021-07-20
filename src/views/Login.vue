@@ -9,9 +9,9 @@
                 label-width="0px"
                 class="ms-content"
             >
-                <el-form-item prop="phonenumber">
+                <el-form-item prop="phoneNumber">
                     <el-input
-                        v-model="param.phonenumber"
+                        v-model="param.phoneNumber"
                         placeholder="手机号码"
                     >
                         <template #prepend>
@@ -24,7 +24,7 @@
                         type="password"
                         placeholder="账户密码"
                         v-model="param.password"
-                        @keyup.enter="loginHandle"
+                        @keyup.enter="handleLogin"
                     >
                         <template #prepend>
                             <el-button icon="el-icon-lock"></el-button>
@@ -32,7 +32,7 @@
                     </el-input>
                 </el-form-item>
                 <div class="login-btn">
-                    <el-button type="primary" @click="loginHandle"
+                    <el-button type="primary" @click="handleLogin"
                         >登录</el-button
                     >
                     <el-button type="primary" @click="dialogVisible = true"
@@ -56,9 +56,9 @@
                         </template>
                     </el-input>
                 </el-form-item>
-                <el-form-item prop="phonenumber">
+                <el-form-item prop="phoneNumber">
                     <el-input
-                        v-model="param.phonenumber"
+                        v-model="param.phoneNumber"
                         placeholder="手机号码"
                     >
                         <template #prepend>
@@ -71,15 +71,15 @@
                         type="password"
                         placeholder="账户密码"
                         v-model="param.password"
-                        @keyup.enter="regisiterHandle"
+                        @keyup.enter="handleRegister"
                     >
                         <template #prepend>
                             <el-button icon="el-icon-lock"></el-button>
                         </template>
                     </el-input>
                 </el-form-item>
-                <div class="login-btn">
-                    <el-button type="primary" @click="regisiterHandle"
+                <div class="register-btn">
+                    <el-button type="primary" @click="handleRegister"
                         >注册</el-button
                     >
                     <el-button type="primary" @click="dialogVisible = false"
@@ -103,7 +103,7 @@ export default {
         const router = useRouter();
         const param = reactive({
             username: "",
-            phonenumber: "19982006581",
+            phoneNumber: "19982006581",
             password: "123",
         });
 
@@ -121,18 +121,17 @@ export default {
         };
         const login = ref(null);
 
-        const loginHandle = () => {
+        const handleLogin = () => {
             login.value.validate((valid) => {
                 if (valid) {
                     service({
                         method: "post",
                         url: "/sys/login",
                         data: {
-                            phone_number: param.phonenumber,
+                            phone_number: param.phoneNumber,
                             password: param.password,
                         },
                     }).then((response) => {
-                        console.log(response);
                         switch (response.code) {
                             case 5001:
                                 ElMessage.error("用户不存在");
@@ -147,7 +146,7 @@ export default {
                                 );
                                 localStorage.setItem(
                                     "ms_userphone",
-                                    param.phonenumber
+                                    param.phoneNumber
                                 );
                                 localStorage.setItem("ms_usertype", "user");
                                 router.push("/user");
@@ -160,7 +159,7 @@ export default {
                                 );
                                 localStorage.setItem(
                                     "ms_userphone",
-                                    param.phonenumber
+                                    param.phoneNumber
                                 );
                                 localStorage.setItem("ms_usertype", "admin");
                                 router.push("/admin");
@@ -168,7 +167,9 @@ export default {
                             default:
                                 break;
                         }
-                    });
+                    }).catch((error) => {
+                        ElMessage.error("登录失败："+error);
+                    })
                 } else {
                     ElMessage.error("登录失败");
                     return false;
@@ -176,7 +177,7 @@ export default {
             });
         };
 
-        const regisiterHandle = () => {
+        const handleRegister = () => {
             login.value.validate((valid) => {
                 if (valid) {
                     service({
@@ -184,7 +185,7 @@ export default {
                         url: "/sys/register",
                         data: {
                             user_name: param.username,
-                            phone_number: param.phonenumber,
+                            phone_number: param.phoneNumber,
                             password: param.password,
                         },
                     }).then((response) => {
@@ -199,7 +200,9 @@ export default {
                             default:
                                 break;
                         }
-                    });
+                    }).catch((error) => {
+                        ElMessage.error("注册失败："+error);
+                    })
                 } else {
                     ElMessage.error("注册失败");
                     return false;
@@ -214,8 +217,8 @@ export default {
             param,
             rules,
             login,
-            loginHandle,
-            regisiterHandle,
+            handleLogin,
+            handleRegister,
         };
     },
     computed: {
@@ -273,8 +276,13 @@ export default {
     line-height: 30px;
     color: #fff;
 }
-.rsgisiter-btn {
+.register-btn {
     text-align: center;
+}
+.register-btn button {
+    width: 45%;
+    height: 36px;
+    margin-bottom: 10px;
 }
 .rsgisiter-btn button {
     width: 45%;

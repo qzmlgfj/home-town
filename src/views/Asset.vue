@@ -37,9 +37,9 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="assetId" label="资产编号"  sortable></el-table-column>
-                <el-table-column prop="type" label="类型"  sortable></el-table-column>
-                <el-table-column prop="assetValue" label="价值" sortable></el-table-column>
+                <el-table-column prop="assetId" label="资产编号" sortable></el-table-column>
+                <el-table-column prop="type" label="资产类型"  sortable></el-table-column>
+                <el-table-column prop="assetValue" label="资产价值" sortable></el-table-column>
                 <el-table-column label="状态" >
                     <template #default="scope">
                         <el-tag :type="assetStates.find(item => item.assetState === scope.row.state).type">
@@ -82,19 +82,20 @@
         <!-- 编辑弹出框 -->
         <el-dialog title="资产信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
-            <el-form label-width="70px">
-                <el-form-item label="资产编号">
-                    <el-input v-model="form.assetId"></el-input>
+            <el-form label-width="80px" :model="form" :rules="formRules" ref="form"
+                     hide-required-asterisk>
+                <el-form-item label="资产编号" prop="assetId" inline-message>
+                    <el-input v-model.number="form.assetId"></el-input>
                 </el-form-item>
-                <el-form-item label="类型">
+                <el-form-item label="资产类型" prop="type" inline-message>
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="价值">
-                    <el-input v-model="form.assetValue">
+                <el-form-item label="资产价值" prop="assetValue" inline-message>
+                    <el-input v-model.number="form.assetValue">
                         <template #prepend>￥</template>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="状态">
+                <el-form-item label="资产状态" prop="state" inline-message>
                     <template #default="scope">
                         <el-select v-model="form.state" :placeholder="form.state">
                             <el-option
@@ -109,8 +110,8 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="editVisible = false">取 消</el-button>
-                    <el-button v-if="isUpdate" type="primary"  @click="saveUpdate">确 定</el-button>
-                    <el-button v-if="isInsert" type="primary"  @click="saveInsert">确 定</el-button>
+                    <el-button v-if="isUpdate" type="primary"  @click="saveUpdate('form')">确 定</el-button>
+                    <el-button v-if="isInsert" type="primary"  @click="saveInsert('form')">确 定</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -118,7 +119,7 @@
 </template>
 
 <script>
-import { ref} from "vue";
+import {reactive, ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import service from "../utils/request";
 
@@ -140,28 +141,50 @@ export default {
              */
             searchOptions : [
                 { value:"asset_id", label : "资产编号"},
-                { value:"asset_value", label : "价值"},
+                { value:"asset_value", label : "资产价值"},
             ],
             //用户选择的搜索项目
-            searchOption:"",
+            searchOption : "",
             //用户搜索输入框内容
-            searchContent:"",
+            searchContent : "",
+            //用户点击的表格行索引
+            clickedIndex : -1,
+            // 标明为插入操作
+            isInsert : false,
+            // 标明为更新操作
+            isUpdate : false,
+            // 表单是否可见
+            editVisible : false,
             //表单数据
-            form:{
+            form : {
                 id:"",
                 assetId:"",
                 type:"",
                 assetValue:"",
                 state:"",
             },
-            //用户点击的表格行索引
-            idx : -1,
-            // 标明为插入操作
-            isInsert : false,
-            // 标明为更新操作
-            isUpdate :false,
-            // 表单是否可见
-            editVisible : false,
+            formRules : {
+                assetId: [
+                    { required: true, message: '资产编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '资产编号只能为数字', trigger: 'change' },
+                ],
+                type: [
+                    { required: true, message: '资产类型不能为空', trigger: 'blur' },
+                ],
+                assetValue: [
+                    { required: true, message: '资产价值不能为空', trigger: 'blur' },
+                    { type: 'number', message: '请输入数字', trigger: 'change' },
+                ],
+                state: [
+                    { required: true, message: '请选择资产状态', trigger: 'change' },
+                ],
+                startDate:[
+                    { required:true, message:'请选择开始日期',trigger: 'blur'}
+                ],
+                deadLine:[
+                    { required:true, message:'请选择结束日期',trigger: 'blur'}
+                ],
+            },
         }
     },
     setup(){
@@ -169,21 +192,21 @@ export default {
          * 数据区
          */
             // 查询时的数据
-        let query = {
+        const query = reactive({
                 fieldName:"",
                 fieldValue:"",
                 pageIndex: 1,
                 pageSize: 5,
-            };
+            });
         // 表格当前页数据
-        const tableData = ref([]);
+        let tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
         /**
          * 方法区
          */
-            // 从后端获取表格数据
-        const getData = () => {
+        // 从后端获取表格数据
+        const getTableData = () => {
             service({
                 method : "post",
                 url: "/asset/query",
@@ -201,22 +224,22 @@ export default {
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
-            getData();
+            getTableData();
         };
         // 页面大小改变操作
         const handleSizeChange = (val) => {
             query.pageSize = val;
-            getData();
+            getTableData();
         };
         /**
          * 执行区，初始化时执行的方法
          */
-        getData()
+        getTableData();
         return {
             query,
             tableData,
             pageTotal,
-            getData,
+            getTableData,
             handleSizeChange,
             handlePageChange,
         };
@@ -233,7 +256,7 @@ export default {
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
-                    var data = response.data
+                    const data = response.data;
                     this.tableData = data.list
                     this.pageTotal = data.total
                 }
@@ -252,12 +275,10 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
-            let form = this.form
+            const form = JSON.parse(JSON.stringify(this.form));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                //填充表单数据
-                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/asset/delete",
@@ -267,7 +288,7 @@ export default {
                         ElMessage.success("删除成功");
                         //此处处理表格变化
                         this.tableData.splice(index,1)
-                        this.getData();
+                        this.getTableData();
                     } else {
                         ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
@@ -278,60 +299,68 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row){
-            this.idx = index;
-            this.form = this.tableData[index];
+            this.clickedIndex = index;
+            this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
-        saveUpdate(){
-            let form = this.form
-            let idx = this.idx
-            this.isUpdate = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url:"/asset/update",
-                data : form,
-            }).then((response) => {
-                if (response.code === 200) {
-                    ElMessage.success(`编辑成功`);
-                    //刷新表格
-                    this.tableData[idx] = response.data.list;
-                } else {
-                    ElMessage.error(`编辑失败：` + response.message);
+        saveUpdate(formName){
+            this.$refs[formName].validate((valid) => {
+                if(valid){
+                    const form = JSON.parse(JSON.stringify(this.form));
+                    let idx = this.clickedIndex
+                    this.isUpdate = false
+                    this.editVisible = false
+                    service({
+                        method : "post",
+                        url:"/asset/update",
+                        data : form,
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`编辑成功`);
+                            //刷新表格
+                            this.tableData[idx] = response.data.list;
+                        } else {
+                            ElMessage.error(`编辑失败：` + response.message);
+                        }
+                    }).catch((error) => {
+                        ElMessage.error(`编辑失败：` + error);
+                    })
                 }
-            }).catch((error) => {
-                ElMessage.error(`编辑失败：` + error);
             })
         },
         //处理新增操作
         handleInsert(){
             //清空表单
-            this.form = {};
+            this.form = {}
             this.isInsert = true
             this.editVisible = true
         },
         // 保存新增数据到后端
-        saveInsert() {
-            let form = this.form
-            this.isInsert = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url : "/asset/insert",
-                data : form
-            }).then((response) => {
-                if (response.code === 200) {
-                    ElMessage.success(`插入成功`);
-                    this.getData()
-                }else {
-                    ElMessage.error(`插入失败：` + response.message);
+        saveInsert(formName){
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    this.isInsert = false
+                    this.editVisible = false
+                    service({
+                        method: "post",
+                        url: "/asset/insert",
+                        data: this.form
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`插入成功`);
+                            this.getTableData()
+                        } else {
+                            ElMessage.error(`插入失败：` + response.message);
+                        }
+                    }).catch(error => {
+                        ElMessage.error(`插入失败：` + error);
+                    })
                 }
-            }).catch(error => {
-                ElMessage.error(`插入失败：` + error);
-            })
-        }
+            });
+        },
+
     }
 }
 </script>

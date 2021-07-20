@@ -57,17 +57,13 @@
                 @selection-change="handleTableSelectionChange"
             >
                 <el-table-column prop="fundId" label="资金编号" sortable></el-table-column>
-                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="type" label="资金类型" sortable></el-table-column>
                 <el-table-column prop="fundValue" label="金额" sortable></el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{
-                        scope.row.createTime
-                    }}</template>
+                    <template #default="scope">{{scope.row.createTime }}</template>
                 </el-table-column>
                 <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{
-                        scope.row.updateTime
-                    }}</template>
+                    <template #default="scope">{{scope.row.updateTime }}</template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
@@ -130,15 +126,15 @@
             width="30%"
             @closed="handleDialogClosed"
         >
-            <el-form label-width="70px">
-                <el-form-item label="资金编号">
-                    <el-input v-model="form.fundId"></el-input>
+            <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
+                <el-form-item label="资金编号" prop="fundId">
+                    <el-input v-model.number="form.fundId"></el-input>
                 </el-form-item>
-                <el-form-item label="类型">
+                <el-form-item label="资金类型" prop="type">
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="金额">
-                    <el-input v-model="form.fundValue">
+                <el-form-item label="金额" prop="money">
+                    <el-input v-model.number="form.fundValue">
                         <template #prepend>￥</template>
                     </el-input>
                 </el-form-item>
@@ -149,13 +145,13 @@
                     <el-button
                         v-if="isUpdate"
                         type="primary"
-                        @click="saveUpdate"
+                        @click="saveUpdate('form')"
                         >确 定</el-button
                     >
                     <el-button
                         v-if="isInsert"
                         type="primary"
-                        @click="saveInsert"
+                        @click="saveInsert('form')"
                         >确 定</el-button
                     >
                 </span>
@@ -196,6 +192,19 @@ export default {
                 fundValue: "",
                 type: "",
             },
+            formRules : {
+                funId: [
+                    { required: true, message: '资金编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '资金编号只能为数字', trigger: 'change' },
+                ],
+                type: [
+                    { required: true, message: '资金类型不能为空', trigger: 'blur' },
+                ],
+                assetValue: [
+                    { required: true, message: '金额不能为空', trigger: 'blur' },
+                    { type: 'number', message: '请输入数字', trigger: 'change' },
+                ],
+            },
             //用户点击的表格行索引
             idx: -1,
             // 标明为插入操作
@@ -232,7 +241,7 @@ export default {
         const chartData = reactive({
             type: "pie",
             title: {
-                text: "资金种类饼状图",
+                text: "资金类型饼状图",
             },
             legend: {
                 position: "left",
@@ -248,33 +257,31 @@ export default {
         /**
          * 方法区
          */
-        // 从后端获取表格数据
-        const getData = () => {
+        // 获取表格数据
+        const getTableData = () => {
             service({
                 method: "post",
                 url: "/fund/query",
                 data: query,
-            })
-                .then((response) => {
-                    if (response.code === 200) {
-                        var data = response.data;
-                        tableData.value = data.list;
-                        pageTotal.value = data.total;
-                    }
-                })
-                .catch((error) => {
-                    ElMessage.error("加载数据失败：" + error);
-                });
+            }).then((response) => {
+                if (response.code === 200) {
+                    const data = response.data;
+                    tableData.value = data.list;
+                    pageTotal.value = data.total;
+                }
+            }).catch((error) => {
+                ElMessage.error("加载数据失败：" + error);
+            });
         };
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
-            getData();
+            getTableData();
         };
         // 页面大小改变操作
         const handleSizeChange = (val) => {
             query.pageSize = val;
-            getData();
+            getTableData();
         };
         // 获取当前年月
         const getYearMonth = () => {
@@ -288,23 +295,20 @@ export default {
                 method: "post",
                 url: "/fund/querychart",
                 data: queryChartData,
-            })
-                .then((response) => {
-                    chartData.labels = response.data.list.labels;
-                    chartData.datasets[0].data = response.data.list.data;
-                    chartKey.value++;
-                })
-                .catch((error) => {
-                    ElMessage.error("加载数据失败：" + error);
-                });
+            }).then((response) => {
+                chartData.labels = response.data.list.labels;
+                chartData.datasets[0].data = response.data.list.data;
+                chartKey.value++;
+            }).catch((error) => {
+                ElMessage.error("加载数据失败：" + error);
+            });
         };
         /**
          * 执行区，初始化时执行的方法
          */
-        getData();
+        getTableData();
         getYearMonth();
         updateChart();
-
         return {
             query,
             tableData,
@@ -312,7 +316,7 @@ export default {
             queryChartData,
             chartData,
             chartKey,
-            getData,
+            getTableData,
             handleSizeChange,
             handlePageChange,
             updateChart,
@@ -328,17 +332,15 @@ export default {
                 method: "post",
                 url: "/fund/query",
                 data: query,
-            })
-                .then((response) => {
-                    if (response.code === 200) {
-                        var data = response.data;
-                        this.tableData = data.list;
-                        this.pageTotal = data.total;
-                    }
-                })
-                .catch((error) => {
-                    ElMessage("查询失败" + error);
-                });
+            }).then((response) => {
+                if (response.code === 200) {
+                    const data = response.data;
+                    this.tableData = data.list;
+                    this.pageTotal = data.total;
+                }
+            }).catch((error) => {
+                ElMessage("查询失败" + error);
+            });
         },
         //表格选择项目改变时
         handleTableSelectionChange(val) {
@@ -351,12 +353,10 @@ export default {
         },
         // 删除操作
         handleDelete(index, row) {
-            let form = this.form;
+            const form = JSON.parse(JSON.stringify(this.form));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                //填充表单数据
-                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/fund/delete",
@@ -366,7 +366,8 @@ export default {
                         ElMessage.success("删除成功");
                         //此处处理表格变化
                         this.tableData.splice(index,1)
-                        this.getData();
+                        this.getTableData();
+                        this.updateChart()
                     } else {
                         ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
@@ -378,47 +379,37 @@ export default {
         //处理保存动作
         handleUpdate(index, row) {
             this.idx = index;
-            this.form = this.tableData[index];
+            this.form=JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
-        saveUpdate(){
-            //必须先保存用户点击的索引
-            const idx = this.idx
-            const form = this.form
-            this.isUpdate = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url:"/fund/update",
-                data : form,
-            }).then((response) => {
-                if (response.code === 200) {
-                    //刷新表格
-                    this.tableData[idx] = response.data.list;
-                    ElMessage.success(`编辑成功`);
-                } else {
-                    ElMessage.error(`编辑失败：` + response.message);
+        saveUpdate(formName){
+            this.$refs[formName].validate((valid) => {
+                if(valid){
+                    const form = JSON.parse(JSON.stringify(this.form));
+                    let idx = this.clickedIndex
+                    this.isUpdate = false
+                    this.editVisible = false
+                    service({
+                        method : "post",
+                        url:"/fund/update",
+                        data : form,
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`编辑成功`);
+                            //刷新表格
+                            this.tableData[idx] = response.data.list;
+                            this.updateChart();
+                        } else {
+                            ElMessage.error(`编辑失败：` + response.message);
+                        }
+                    }).catch((error) => {
+                        ElMessage.error(`编辑失败：` + error);
+                    })
                 }
-            }).catch((error) => {
-                ElMessage.error(`编辑失败：` + error);
             })
-                .then((response) => {
-                    if (response.code === 200) {
-                        ElMessage.success(`编辑成功`);
-                        const data = response.data.list;
-                        //刷新表格
-                        Object.keys(data).forEach((item) => {
-                            this.tableData[idx][item] = data[item];
-                        });
-                    } else {
-                        ElMessage.error(`编辑失败：` + response.message);
-                    }
-                })
-                .catch((error) => {
-                    ElMessage.error(`编辑失败：` + error);
-                });
+
         },
         //处理新增操作
         handleInsert(){
@@ -428,36 +419,29 @@ export default {
             this.editVisible = true
         },
         // 保存新增数据到后端
-        saveInsert() {
-            let form = this.form;
-            this.isInsert = false;
-            this.editVisible = false;
-            service({
-                method : "post",
-                url : "/fund/insert",
-                data : form
-            }).then((response) => {
-                if (response.code === 200) {
-                    ElMessage.success(`插入成功`);
-                    this.getData()
-                }else {
-                    ElMessage.error(`插入失败：` + response.message);
+        saveInsert(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    this.isInsert = false
+                    this.editVisible = false
+                    service({
+                        method: "post",
+                        url: "/fund/insert",
+                        data: this.form
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`插入成功`);
+                            this.getTableData()
+                            this.updateChart();
+                        } else {
+                            ElMessage.error(`插入失败：` + response.message);
+                        }
+                    }).catch(error => {
+                        ElMessage.error(`插入失败：` + error);
+                    })
                 }
-            }).catch(error => {
-                ElMessage.error(`插入失败：` + error);
-            })
-                .then((response) => {
-                    console.log(response);
-                    if (response.code === 200) {
-                        ElMessage.success(`插入成功`);
-                        this.getData();
-                    } else {
-                        ElMessage.error(`插入失败：` + response.message);
-                    }
-                })
-                .catch((error) => {
-                    ElMessage.error(`插入失败：` + error);
-                });
+            });
+
         },
     },
 };

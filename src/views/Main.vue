@@ -11,7 +11,7 @@
                     <h1>示范区基层公开监督管理平台</h1>
                 </div>
             </div>
-            
+
             <div class="header-right">
                 <el-descriptions title="欢迎您，xxx">
                     <el-descriptions-item label="手机号：">18100000000</el-descriptions-item>
@@ -28,7 +28,7 @@
         </div>
 
         <el-divider></el-divider>
-        
+
         <el-container>
             <el-main>
                 <el-carousel :interval="4000"  height="250px" autoplay>
@@ -38,7 +38,7 @@
                 </el-carousel>
             </el-main>
         </el-container>
-        
+
         <br>
          <el-divider></el-divider>
         <br>
@@ -82,10 +82,10 @@
                                      <el-divider direction="vertical"></el-divider>
                                      <div class="right-time">
                                          {{item.releaseDate}}
-                                     </div> 
+                                     </div>
                                     <el-divider ></el-divider>
                                 </div>
-                                
+
                                 <div class="block">
                                     <el-pagination
                                     @current-change="handleCurrentChange"
@@ -97,9 +97,9 @@
                                 </div>
                             </el-card>
                         </el-col>
-                            
+
                     </el-row>
-                    
+
                 </el-main>
         </el-container>
         <br>
@@ -120,7 +120,7 @@
             </el-affix>
             </el-col>
             </el-row>
-            
+
             <el-dialog title="满意度评价" v-model="dialogVisible">
                 <el-form ref="formref" :model="form" :rules="thisrule" label-position="right" label-width="100px">
                     <el-form-item label="姓名">
@@ -148,7 +148,7 @@
                     <el-input type="textarea" v-model="form.extra" placeholder="如有其他建议，请在此处填写"></el-input>
                     </el-form-item>
                 </el-form>
-                 
+
                 <template #footer>
                     <div class="dialog-footer" align="center">
                     <el-button @click="dialogVisible = false" size="medium">取消</el-button>
@@ -160,25 +160,23 @@
     </el-container>
     </div>
     </el-scrollbar>
-    
 
-    
+
+
 
 </template>
 
 <script>
 import { ElButton } from "element-plus";
-import { ref, reactive } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { ElMessage, ElDialog } from "element-plus";
+import { ref} from "vue";
+import { ElMessage} from "element-plus";
 import service from "../utils/request";
 
 export default {
     name: "Main",
-    
+
     setup(){
-        
+
         let items=ref([]);
         let totalNum=ref(0);
         let mainpart=ref("三务公开");
@@ -188,9 +186,9 @@ export default {
                 fieldName:"",
                 fieldValue:"",
         };
-        
+
         const getData=(mainpartValue,url)=>{
-            if(mainpart.value!=mainpartValue)
+            if(mainpart.value!==mainpartValue)
                 {
                     query.pageIndex=1;
                     mainpart.value=mainpartValue;
@@ -205,10 +203,10 @@ export default {
                     items.value=Response.data.list;
                     totalNum.value=Response.data.total;
                 }
-            })  
+            })
         };
         const showAffair=()=>{
-            getData("三务公开","/transaction/query");
+            getTableData("三务公开","/transaction/query");
         };
         const showHotspot=()=>{
              getData("热点搜集公开","/hotspot/query");
@@ -216,7 +214,7 @@ export default {
         const showPolicy=()=>{
              getData("廉政公开","/publicity/query");
         };
-        
+
         showAffair()
         return {
             items,
@@ -227,11 +225,11 @@ export default {
             showAffair,
             showHotspot,
             showPolicy,
-        };   
+        };
     },
     data(){
         return{
-            
+
             imgbox:[
                 {   id:0,
                     src:"https://pic.qzmlgfj.ml/images/2020/10/19/b1d332cb1bac08cbc308435220821440.jpg"},
@@ -255,22 +253,19 @@ export default {
             ],
             tel: [
                 { required: true, message: "请输入电话号码", trigger: "blur"}
-            ], 
-            
+            ],
+
         },
-            
+
         }
     },
     components: {
         ElButton,
     },
-    
+
     methods: {
         login() {
             this.$router.push("/login");
-        },
-        handleCurrentChange(val){
-            this.query.pageIndex=val;
         },
         handleCurrentChange(val){
             this.query.pageIndex=val;
@@ -278,7 +273,7 @@ export default {
                 this.showAffair();
             else if(this.mainpart==="热点搜集公开")
                 this.showHotspot();
-            else 
+            else
                 this.showPolicy();
         },
         submitForm(){
@@ -331,7 +326,7 @@ export default {
     width: 100%;
     height: 80px;
     background-color: rgb(255, 255, 255);
-    border-bottom-color:rgb(25, 66, 25),
+    border-bottom-color:rgb(25, 66, 25);
 
 }
 .left-icon{
