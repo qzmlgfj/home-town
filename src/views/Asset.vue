@@ -121,8 +121,6 @@
 <script>
 import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import axios from "axios";
-import moment from "_moment@2.29.1@moment";
 import service from "../utils/request";
 
 export default {
