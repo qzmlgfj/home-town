@@ -130,6 +130,7 @@
                         class="schart"
                         canvasId="canvas"
                         :options="chartData"
+                        :key="chartKey"
                     />
                 </el-card>
             </el-col>
@@ -233,6 +234,8 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
+        // 强制图表重新渲染
+        const chartKey = ref(0);
         //图表查询数据
         const queryChartData = reactive({
             year: 1,
@@ -302,6 +305,7 @@ export default {
                 .then((response) => {
                     chartData.labels = response.data.list.labels;
                     chartData.datasets[0].data = response.data.list.data;
+                    chartKey.value++;
                 })
                 .catch((error) => {
                     ElMessage.error("加载数据失败：" + error);
@@ -320,6 +324,7 @@ export default {
             pageTotal,
             queryChartData,
             chartData,
+            chartKey,
             getData,
             handleSizeChange,
             handlePageChange,
