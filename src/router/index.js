@@ -41,14 +41,6 @@ const routes = [
                 component: () => import("../views/Fund.vue")
             },
             {
-                path: "fund",
-                name: "fund",
-                meta: {
-                    title: '资金管理'
-                },
-                component: () => import("../views/Fund.vue")
-            },
-            {
                 path: "asset",
                 name: "asset",
                 meta: {
