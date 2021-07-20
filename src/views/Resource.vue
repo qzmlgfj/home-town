@@ -37,7 +37,6 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="id"></el-table-column>
                 <el-table-column prop="resourceId" label="资源编号"  sortable></el-table-column>
                 <el-table-column prop="type" label="类型"  sortable></el-table-column>
                 <el-table-column prop="resourceValue" label="价值" sortable></el-table-column>
@@ -257,9 +256,8 @@ export default {
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                Object.keys(form).forEach((item) => {
-                    form[item] = row[item];
-                });
+                //填充表单数据
+                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/resource/delete",
@@ -276,23 +274,20 @@ export default {
                 }).catch((error) => {
                     ElMessage.error(`删除失败：` + error);
                 })
-            }).catch(() => {
-            });
+            })
         },
         //处理保存动作
         handleUpdate(index, row){
             this.idx = index;
-            let form = this.form
-            Object.keys(form).forEach((item) => {
-                form[item] = row[item];
-            });
+            this.form = this.tableData[index];
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
         saveUpdate(){
-            let form = this.form
-            let idx = this.idx
+            //必须先保存用户点击的索引
+            const idx = this.idx
+            const form = this.form
             this.isUpdate = false
             this.editVisible = false
             service({
@@ -301,10 +296,9 @@ export default {
                 data : form,
             }).then((response) => {
                 if (response.code === 200) {
+                    //刷新表格
+                    this.tableData[idx] = response.data.list;
                     ElMessage.success(`编辑成功`);
-                    Object.keys(form).forEach((item) => {
-                        this.tableData[idx][item] = form[item];
-                    });
                 } else {
                     ElMessage.error(`编辑失败：` + response.message);
                 }
@@ -314,11 +308,8 @@ export default {
         },
         //处理新增操作
         handleInsert(){
-            let form = this.form
             //清空表单
-            Object.keys(form).forEach((item) => {
-                form[item] = "";
-            });
+            this.form = {};
             this.isInsert = true
             this.editVisible = true
         },

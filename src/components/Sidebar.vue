@@ -123,7 +123,7 @@ export default {
     width: 0;
 }
 .sidebar-el-menu:not(.el-menu--collapse) {
-    width: 250px;
+    width: 140px;
 }
 .sidebar > ul {
     height: 100%;

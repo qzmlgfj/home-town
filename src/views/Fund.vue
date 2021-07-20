@@ -56,22 +56,9 @@
                 highlight-current-row
                 @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="id" sortable></el-table-column>
-                <el-table-column
-                    prop="fundId"
-                    label="资金编号"
-                    sortable
-                ></el-table-column>
-                <el-table-column
-                    prop="type"
-                    label="类型"
-                    sortable
-                ></el-table-column>
-                <el-table-column
-                    prop="fundValue"
-                    label="金额"
-                    sortable
-                ></el-table-column>
+                <el-table-column prop="fundId" label="资金编号" sortable></el-table-column>
+                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="fundValue" label="金额" sortable></el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable>
                     <template #default="scope">{{
                         scope.row.createTime
@@ -367,56 +354,55 @@ export default {
             let form = this.form;
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
-            })
-                .then(() => {
-                    Object.keys(form).forEach((item) => {
-                        form[item] = row[item];
-                    });
-                    service({
-                        method: "post",
-                        url: "/fund/delete",
-                        data: form,
-                    })
-                        .then((response) => {
-                            if (response.code === 200) {
-                                ElMessage.success("删除成功");
-                                //此处处理表格变化
-                                this.tableData.splice(index, 1);
-                                this.getData();
-                            } else {
-                                ElMessage.error(
-                                    `删除失败，错误信息:` + response.message
-                                );
-                            }
-                        })
-                        .catch((error) => {
-                            ElMessage.error(`删除失败：` + error);
-                        });
-                })
-                .catch((error) => {
+            }).then(() => {
+                //填充表单数据
+                form = this.tableData[index];
+                service({
+                    method : "post",
+                    url : "/fund/delete",
+                    data : form
+                }).then((response) => {
+                    if (response.code === 200) {
+                        ElMessage.success("删除成功");
+                        //此处处理表格变化
+                        this.tableData.splice(index,1)
+                        this.getData();
+                    } else {
+                        ElMessage.error(`删除失败，错误信息:` + response.message);
+                    }
+                }).catch((error) => {
                     ElMessage.error(`删除失败：` + error);
-                });
+                })
+            })
         },
         //处理保存动作
         handleUpdate(index, row) {
             this.idx = index;
-            let form = this.form;
-            Object.keys(form).forEach((item) => {
-                form[item] = row[item];
-            });
-            this.isUpdate = true;
-            this.editVisible = true;
+            this.form = this.tableData[index];
+            this.isUpdate = true
+            this.editVisible = true
         },
         //保存更改到后端
-        saveUpdate() {
-            let form = this.form;
-            let idx = this.idx;
-            this.isUpdate = false;
-            this.editVisible = false;
+        saveUpdate(){
+            //必须先保存用户点击的索引
+            const idx = this.idx
+            const form = this.form
+            this.isUpdate = false
+            this.editVisible = false
             service({
-                method: "post",
-                url: "/fund/update",
-                data: form,
+                method : "post",
+                url:"/fund/update",
+                data : form,
+            }).then((response) => {
+                if (response.code === 200) {
+                    //刷新表格
+                    this.tableData[idx] = response.data.list;
+                    ElMessage.success(`编辑成功`);
+                } else {
+                    ElMessage.error(`编辑失败：` + response.message);
+                }
+            }).catch((error) => {
+                ElMessage.error(`编辑失败：` + error);
             })
                 .then((response) => {
                     if (response.code === 200) {
@@ -435,14 +421,11 @@ export default {
                 });
         },
         //处理新增操作
-        handleInsert() {
-            let form = this.form;
+        handleInsert(){
             //清空表单
-            Object.keys(form).forEach((item) => {
-                form[item] = "";
-            });
-            this.isInsert = true;
-            this.editVisible = true;
+            this.form = {};
+            this.isInsert = true
+            this.editVisible = true
         },
         // 保存新增数据到后端
         saveInsert() {
@@ -450,9 +433,18 @@ export default {
             this.isInsert = false;
             this.editVisible = false;
             service({
-                method: "post",
-                url: "/fund/insert",
-                data: form,
+                method : "post",
+                url : "/fund/insert",
+                data : form
+            }).then((response) => {
+                if (response.code === 200) {
+                    ElMessage.success(`插入成功`);
+                    this.getData()
+                }else {
+                    ElMessage.error(`插入失败：` + response.message);
+                }
+            }).catch(error => {
+                ElMessage.error(`插入失败：` + error);
             })
                 .then((response) => {
                     console.log(response);

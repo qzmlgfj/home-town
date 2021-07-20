@@ -37,7 +37,6 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="id" v-show="false"></el-table-column>
                 <el-table-column prop="projectId" label="项目编号"  sortable></el-table-column>
                 <el-table-column prop="projectName" label="项目名称" sortable></el-table-column>
                 <el-table-column prop="principal" label="负责人" sortable></el-table-column>
@@ -256,9 +255,8 @@ export default {
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                Object.keys(form).forEach((item) => {
-                    form[item] = row[item];
-                });
+                //填充表单数据
+                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/project/delete",
@@ -275,24 +273,20 @@ export default {
                 }).catch((error) => {
                     ElMessage.error(`删除失败：` + error);
                 })
-            }).catch((error) => {
-                ElMessage.error(`删除失败：` + error);
-            });
+            })
         },
         //处理保存动作
         handleUpdate(index, row){
             this.idx = index;
-            let form = this.form
-            Object.keys(form).forEach((item) => {
-                form[item] = row[item];
-            });
+            this.form = this.tableData[index];
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
         saveUpdate(){
+            //必须先保存用户点击的索引
+            const idx = this.idx
             let form = this.form
-            let idx = this.idx
             this.isUpdate = false
             this.editVisible = false
             service({
@@ -301,14 +295,9 @@ export default {
                 data : form,
             }).then((response) => {
                     if (response.code === 200) {
-                        console.log(response.data)
-                        const data = response.data.list;
                         //刷新表格
-                        Object.keys(data).forEach((item) => {
-                            this.tableData[idx][item] = data[item];
-                        });
+                        this.tableData[idx] = response.data.list;
                         ElMessage.success(`编辑成功`);
-
                     } else {
                         ElMessage.error(`编辑失败：` + response.message);
                     }
