@@ -37,7 +37,6 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="id" v-show="false"></el-table-column>
                 <el-table-column prop="contractId" label="合同编号"  sortable></el-table-column>
                 <el-table-column prop="partA" label="甲方" sortable></el-table-column>
                 <el-table-column prop="partB" label="乙方" sortable></el-table-column>
@@ -129,8 +128,6 @@
 <script>
 import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import axios from "axios";
-import moment from "_moment@2.29.1@moment";
 import service from "../utils/request";
 
 export default {
@@ -262,9 +259,8 @@ export default {
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                Object.keys(form).forEach((item) => {
-                    form[item] = row[item];
-                });
+                //填充表单数据
+                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/contract/delete",
@@ -288,12 +284,7 @@ export default {
         //处理保存动作
         handleUpdate(index, row){
             this.idx = index;
-            let form = this.form
-            console.log("form="+form)
-            Object.keys(form).forEach((item) => {
-                form[item] = row[item];
-                console.log(form[item])
-            });
+            this.form = this.tableData[index];
             this.isUpdate = true
             this.editVisible = true
         },
@@ -312,23 +303,16 @@ export default {
                     ElMessage.success(`编辑成功`);
                     const data = response.data.list;
                     //刷新表格
-                    Object.keys(data).forEach((item) => {
-                        this.tableData[idx][item] = data[item];
-                    });
+                    this.tableData[idx] = response.data.list;
                 } else {
                     ElMessage.error(`编辑失败：` + response.message);
                 }
-            }).catch((error) => {
-                ElMessage.error(`编辑失败：` + error);
             })
         },
         //处理新增操作
         handleInsert(){
-            let form = this.form
             //清空表单
-            Object.keys(form).forEach((item) => {
-                form[item] = "";
-            });
+            this.form = {};
             this.isInsert = true
             this.editVisible = true
         },

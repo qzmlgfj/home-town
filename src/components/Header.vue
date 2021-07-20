@@ -1,7 +1,7 @@
 <template>
     <div class="header">
         <!-- 折叠按钮 -->
-        <div class="collapse-btn" @click="collapseChage">
+        <div class="collapse-btn" @click="handleCollapseChange">
             <i v-if="!collapse" class="el-icon-s-fold"></i>
             <i v-else class="el-icon-s-unfold"></i>
         </div>
@@ -53,23 +53,23 @@ export default {
         const store = useStore();
         const collapse = computed(() => store.state.collapse);
         // 侧边栏折叠
-        const collapseChage = () => {
+        const handleCollapseChange = () => {
             store.commit("handleCollapse", !collapse.value);
         };
 
         onMounted(() => {
             if (document.body.clientWidth < 1500) {
-                collapseChage();
+                handleCollapseChange();
             }
         });
 
         // 用户名下拉菜单选择事件
         const router = useRouter();
         const handleCommand = (command) => {
-            if (command == "loginout") {
+            if (command === "loginout") {
                 localStorage.removeItem("ms_username");
                 router.push("/login");
-            } else if (command == "user") {
+            } else if (command === "user") {
                 router.push("/user");
             }
         };
@@ -78,7 +78,7 @@ export default {
             username,
             message,
             collapse,
-            collapseChage,
+            handleCollapseChange,
             handleCommand,
         };
     },

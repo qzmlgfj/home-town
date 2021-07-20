@@ -37,7 +37,6 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="id" v-show="false"></el-table-column>
                 <el-table-column prop="itemId" label="编号"  sortable></el-table-column>
                 <el-table-column prop="type" label="类型" sortable></el-table-column>
                 <el-table-column prop="itemName" label="支出名称" sortable></el-table-column>
@@ -101,7 +100,7 @@
                         v-model="form.itemDate"
                         type="date"
                         format="YYYY 年 MM 月 DD 日"
-                        placeholder="请选择事件"
+                        placeholder="请选择时间"
                         value-format="YYYY-MM-DD">
                     </el-date-picker>
                 </el-form-item>
@@ -122,9 +121,7 @@
 
 <script>
 import { ref} from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import axios from "axios";
-import moment from "_moment@2.29.1@moment";
+import { ElMessage, ElMessageBox } from "element-plus";;
 import service from "../utils/request";
 export default {
     name: "earning-table",
@@ -255,9 +252,8 @@ export default {
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                Object.keys(form).forEach((item) => {
-                    form[item] = row[item];
-                });
+                //填充表单数据
+                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/expenditure/delete",
@@ -274,24 +270,20 @@ export default {
                 }).catch((error) => {
                     ElMessage.error(`删除失败：` + error);
                 })
-            }).catch((error) => {
-                ElMessage.error(`删除失败：` + error);
-            });
+            })
         },
         //处理保存动作
         handleUpdate(index, row){
             this.idx = index;
-            let form = this.form
-            Object.keys(form).forEach((item) => {
-                form[item] = row[item];
-            });
+            this.form = this.tableData[index];
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
         saveUpdate(){
-            let form = this.form
+            //必须先保存用户点击的索引
             let idx = this.idx
+            let form = this.form
             this.isUpdate = false
             this.editVisible = false
             service({
@@ -301,11 +293,8 @@ export default {
             }).then((response) => {
                 if (response.code === 200) {
                     ElMessage.success(`编辑成功`);
-                    const data = response.data.list;
                     //刷新表格
-                    Object.keys(data).forEach((item) => {
-                        this.tableData[idx][item] = data[item];
-                    });
+                    this.tableData[idx] = response.data.list;
                 } else {
                     ElMessage.error(`编辑失败：` + response.message);
                 }
