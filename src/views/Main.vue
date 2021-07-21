@@ -233,7 +233,6 @@ import { useRouter } from "vue-router";
 import { ElMessage, ElDialog } from "element-plus";
 import service from "../utils/request";
 import Markdown from "vue3-markdown-it";
-import "github-markdown-css";
 
 export default {
     name: "Main",
@@ -474,4 +473,5 @@ export default {
     margin-top: 2%;
     margin-left: 3%;
 }
+@import "github-markdown-css";
 </style>
