@@ -7,7 +7,7 @@
                         <div class="left-icon">
                             <el-avatar
                                 :size="50"
-                                src="https://pic.qzmlgfj.ml/images/2021/07/20/favicon.png"
+                                src="../../favicon.png"
                             ></el-avatar>
                         </div>
                         <div class="left-text">
@@ -16,9 +16,9 @@
                     </div>
 
                     <div class="header-right">
-                        <el-descriptions :title="userName">
+                        <el-descriptions title="欢迎您，xxx">
                             <el-descriptions-item label="手机号："
-                                >{{phoneNumber}}</el-descriptions-item
+                                >18100000000</el-descriptions-item
                             >
                             <el-descriptions-item label="备注：">
                                 <el-tag size="small"> 普通用户 </el-tag>
@@ -165,7 +165,7 @@
                                     placeholder="请填写手机号码"
                                 ></el-input>
                             </el-form-item>
-                            <el-form-item label="满意度评价1">
+                            <el-form-item label="实时性评价">
                                 <div class="form-rate">
                                     <el-rate
                                         v-model="form.comment1"
@@ -173,7 +173,7 @@
                                     />
                                 </div>
                             </el-form-item>
-                            <el-form-item label="满意度评价2">
+                            <el-form-item label="公开度评价">
                                 <div class="form-rate">
                                     <el-rate
                                         v-model="form.comment2"
@@ -181,7 +181,7 @@
                                     />
                                 </div>
                             </el-form-item>
-                            <el-form-item label="满意度评价3">
+                            <el-form-item label="真实性评价">
                                 <div class="form-rate">
                                     <el-rate
                                         v-model="form.comment3"
@@ -265,8 +265,6 @@ export default {
         const showPolicy = () => {
             getData("廉政公开", "/publicity/query");
         };
-        const userName = ref("欢迎您，"+localStorage.getItem("ms_username"));
-        const phoneNumber = ref(localStorage.getItem("ms_userphone"));
 
         showAffair();
         return {
@@ -274,8 +272,6 @@ export default {
             totalNum,
             mainpart,
             query,
-            userName,
-            phoneNumber,
             getData,
             showAffair,
             showHotspot,
@@ -326,6 +322,9 @@ export default {
     },
 
     methods: {
+        login() {
+            this.$router.push("/login");
+        },
         handleCurrentChange(val) {
             this.query.pageIndex = val;
         },
@@ -341,7 +340,10 @@ export default {
             let formdata = {
                 evaluationId: this.form.tel,
                 evaluator: this.form.name,
-                satisfaction: this.form.comment1,
+                satisfaction:
+                    this.form.comment1 +
+                    this.form.comment2 +
+                    this.form.comment3,
                 comment: this.form.extra,
             };
             service({
