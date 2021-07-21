@@ -20,7 +20,7 @@
                 <el-input v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
-                <el-button @click="isDrawerVisible = true" type="success">查看报表</el-button>
+                <el-button @click="initChart" type="success">查看报表</el-button>
             </div>
             <!--表格区-->
             <el-table :data="tableData" class="table" ref="multipleTable" header-cell-class-name="table-header"
@@ -71,7 +71,7 @@
         </div>
 
         <el-drawer
-            title="收入图表"
+            title="收入相关图表"
             v-model="isDrawerVisible"
             :direction="rtl"
             :before-close="handleDrawerClose" destroy-on-close>
@@ -82,15 +82,20 @@
                     controls-position="right"
                     :min="1"
                     :max="12"
-                    @change="updateChart"
+                    @change="getChartData"
                 ></el-input-number>
             </div>
-            <schart
-                class="schart"
-                canvasId="canvas"
-                :options="chartData"
-                :key="chartKey"
-            />
+            <el-card v-loading ="isLoadingChartData"
+                     element-loading-text="拼命加载中">
+                <schart
+                    class="schart"
+                    canvasId="canvas"
+                    :options="chartData"
+                    :key="chartKey"
+                    v-loading="isLoadingChartData"
+                    element-loading-text="拼命加载中"
+                />
+            </el-card>
         </el-drawer>
 
 
@@ -121,7 +126,7 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="备注" prop="description">
-                    <el-input v-model="form.description"></el-input>
+                    <el-input type="textarea" v-model="form.description"></el-input>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -191,14 +196,42 @@ export default {
                 ],
             },
             //用户点击的表格行索引
-            idx: -1,
+            clickedIndex: -1,
             // 标明为插入操作
             isInsert: false,
             // 标明为更新操作
             isUpdate: false,
             // 表单是否可见
             editVisible: false,
+            //
             isDrawerVisible:false,
+            // 是否正在加载图表数据
+            isLoadingChartData:false,
+            // 强制图表重新渲染
+            chartKey:ref(0),
+            // 图表查询数据
+            queryChartData:reactive({
+                year: 1,
+                month: 1,
+            }),
+            //图表显示数据
+            chartData : reactive({
+                type: "pie",
+                title: {
+                    text: "收入类型分布饼状图",
+                },
+                legend: {
+                    position: "left",
+                },
+                bgColor: "#fbfbfb",
+                labels: [
+                ],
+                datasets: [
+                    {
+                        data: [],
+                    },
+                ],
+            }),
         };
     },
     setup() {
@@ -216,31 +249,6 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
-        // 强制图表重新渲染
-        const chartKey = ref(0);
-        // 图表查询数据
-        const queryChartData = reactive({
-            year: 1,
-            month: 1,
-        });
-        //图表显示数据
-        const chartData = reactive({
-            type: "pie",
-            title: {
-                text: "收入类型饼状图",
-            },
-            legend: {
-                position: "left",
-            },
-            bgColor: "#fbfbfb",
-            labels: [
-            ],
-            datasets: [
-                {
-                    data: [],
-                },
-            ],
-        });
         /**
          * 方法区
          */
@@ -250,17 +258,15 @@ export default {
                 method: "post",
                 url: "/earning/query",
                 data: query,
-            })
-                .then((response) => {
-                    if (response.code === 200) {
-                        var data = response.data
-                        tableData.value = data.list
-                        pageTotal.value = data.total
-                    }
-                })
-                .catch((error) => {
-                    ElMessage.error("加载数据失败：" + error);
-                });
+            }).then((response) => {
+                if (response.code === 200) {
+                    const data = response.data;
+                    tableData.value = data.list
+                    pageTotal.value = data.total
+                }
+            }).catch((error) => {
+                ElMessage.error("加载数据失败：" + error);
+            });
         };
         // 分页导航
         const handlePageChange = (val) => {
@@ -272,48 +278,42 @@ export default {
             query.pageSize = val;
             getTableData();
         };
-        //获取当前年月
-        const getYearMonth = () => {
-            var d = new Date();
-            queryChartData.month = d.getMonth() + 1;
-            queryChartData.year = d.getFullYear();
-        };
-        //更新图表数据
-        const updateChart = () => {
-            service({
-                method: "post",
-                url: "/earning/querychart",
-                data: queryChartData,
-            })
-                .then((response) => {
-                    chartData.labels = response.data.list.labels;
-                    chartData.datasets[0].data = response.data.list.data;
-                    chartKey.value++;
-                })
-                .catch((error) => {
-                    ElMessage.error("加载数据失败：" + error);
-                });
-        };
         /**
          * 执行区，初始化时执行的方法
          */
         getTableData();
-        getYearMonth();
-        updateChart();
         return {
             query,
             tableData,
             pageTotal,
-            queryChartData,
-            chartData,
-            chartKey,
             getTableData,
             handleSizeChange,
             handlePageChange,
-            updateChart,
         };
     },
     methods: {
+        //获取当前年月
+        getYearAndMonth(){
+            const date = new Date();
+            this.queryChartData.month = date.getMonth() + 1;
+            this.queryChartData.year = date.getFullYear();
+        },
+        //更新图表数据
+        getChartData(){
+            service({
+                method: "post",
+                url: "/earning/querychart",
+                data: this.queryChartData,
+            }).then((response) => {
+                this.chartData.labels = response.data.list.labels;
+                this.chartData.datasets[0].data = response.data.list.data;
+                this.chartKey++;
+                return true;
+            }).catch((error) => {
+                ElMessage.error("加载图表失败：" + error);
+            });
+            return false;
+        },
         //搜索操作
         handleSearch() {
             let query = this.query;
@@ -342,10 +342,19 @@ export default {
         },
         handleDrawerClose(done){
             done();
+            this.isLoadingChartData = false;
+        },
+        //图表数据初始化
+        initChart(){
+            this.isLoadingChartData = true
+            this.isDrawerVisible = true;
+            this.getYearAndMonth();
+            this.getChartData();
+            this.isLoadingChartData = false;
         },
         // 删除操作
         handleDelete(index, row){
-            let idx = index;
+            this.clickedIndex = index;
             const form = JSON.parse(JSON.stringify(this.form));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
@@ -360,7 +369,6 @@ export default {
                         //此处处理表格变化
                         this.tableData.splice(index,1)
                         this.getTableData();
-                        this.updateChart();
                     } else {
                         ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
@@ -371,7 +379,7 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row) {
-            this.idx = index;
+            this.clickedIndex = index;
             this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
@@ -393,7 +401,6 @@ export default {
                             ElMessage.success(`编辑成功`);
                             //刷新表格
                             this.tableData[idx] = response.data.list;
-                            this.updateChart();
                         } else {
                             ElMessage.error(`编辑失败：` + response.message);
                         }
@@ -454,17 +461,8 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
 .mr10 {
     margin-right: 10px;
-}
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
 }
 
 .schart {

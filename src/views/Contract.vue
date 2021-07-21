@@ -208,7 +208,7 @@ export default {
                 ]
             },
             //用户点击的表格行索引
-            idx : -1,
+            clickedIndex : -1,
             // 标明为插入操作
             isInsert : false,
             // 标明为更新操作
@@ -328,7 +328,7 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row){
-            this.idx = index;
+            this.clickedIndex = index;
             this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
@@ -368,10 +368,8 @@ export default {
         },
         // 保存新增数据到后端
         saveInsert(formName){
-            console.log(111)
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    console.log(111)
                     const form = JSON.parse(JSON.stringify(this.form));
                     this.isInsert = false
                     this.editVisible = false

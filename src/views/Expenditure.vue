@@ -45,7 +45,7 @@
                     @click="handleInsert"
                     >新增</el-button
                 >
-                <el-button @click="isDrawerVisible = true" type="success">查看报表</el-button>
+                <el-button @click="initChart" type="success">查看报表</el-button>
             </div>
             <!--表格区-->
             <el-table
@@ -114,7 +114,7 @@
                     controls-position="right"
                     :min="1"
                     :max="12"
-                    @change="updateChart"
+                    @change="getChartData"
                 ></el-input-number>
             </div>
             <schart
@@ -238,7 +238,7 @@ export default {
                 ],
             },
             //用户点击的表格行索引
-            idx: -1,
+            clickedIndex: -1,
             // 标明为插入操作
             isInsert: false,
             // 标明为更新操作
@@ -246,6 +246,32 @@ export default {
             // 表单是否可见
             editVisible: false,
             isDrawerVisible:false,
+            // 是否正在加载图表数据
+            isLoadingChartData:false,
+            // 强制图表重新渲染
+            chartKey:ref(0),
+            // 图表查询数据
+            queryChartData:reactive({
+                year: 1,
+                month: 1,
+            }),
+            //图表显示数据
+            chartData:reactive({
+                type: "pie",
+                title: {
+                    text: "支出类型饼状图",
+                },
+                legend: {
+                    position: "left",
+                },
+                bgColor: "#fbfbfb",
+                labels: [],
+                datasets: [
+                    {
+                        data: [],
+                    },
+                ],
+            }),
         };
     },
     setup() {
@@ -263,30 +289,7 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
-        // 强制图表重新渲染
-        const chartKey = ref(0);
-        // 图表查询数据
-        const queryChartData = reactive({
-            year: 1,
-            month: 1,
-        });
-        //图表显示数据
-        const chartData = reactive({
-            type: "pie",
-            title: {
-                text: "支出类型饼状图",
-            },
-            legend: {
-                position: "left",
-            },
-            bgColor: "#fbfbfb",
-            labels: [],
-            datasets: [
-                {
-                    data: [],
-                },
-            ],
-        });
+
         /**
          * 方法区
          */
@@ -316,48 +319,42 @@ export default {
             query.pageSize = val;
             getTableData();
         };
-        // 获取当前年月
-        const getYearMonth = () => {
-            var d = new Date();
-            queryChartData.month = d.getMonth() + 1;
-            queryChartData.year = d.getFullYear();
-        };
-        // 更新图表数据
-        const updateChart = () => {
-            service({
-                method: "post",
-                url: "/expenditure/querychart",
-                data: queryChartData,
-            })
-                .then((response) => {
-                    chartData.labels = response.data.list.labels;
-                    chartData.datasets[0].data = response.data.list.data;
-                    chartKey.value++;
-                })
-                .catch((error) => {
-                    ElMessage.error("加载数据失败：" + error);
-                });
-        };
         /**
          * 执行区，初始化时执行的方法
          */
         getTableData();
-        getYearMonth();
-        updateChart();
         return {
             query,
             tableData,
             pageTotal,
-            queryChartData,
-            chartData,
-            chartKey,
             getTableData,
             handleSizeChange,
             handlePageChange,
-            updateChart,
         };
     },
     methods: {
+        //获取当前年月
+        getYearAndMonth(){
+            const date = new Date();
+            this.queryChartData.month = date.getMonth() + 1;
+            this.queryChartData.year = date.getFullYear();
+        },
+        //更新图表数据
+        getChartData(){
+            service({
+                method: "post",
+                url: "/expenditure/querychart",
+                data: this.queryChartData,
+            }).then((response) => {
+                this.chartData.labels = response.data.list.labels;
+                this.chartData.datasets[0].data = response.data.list.data;
+                this.chartKey++;
+                return true;
+            }).catch((error) => {
+                ElMessage.error("加载图表失败：" + error);
+            });
+            return false;
+        },
         //搜索操作
         handleSearch() {
             let query = this.query;
@@ -384,6 +381,18 @@ export default {
             this.isUpdate = false;
             this.isInsert = false;
         },
+        handleDrawerClose(done){
+            done();
+            this.isLoadingChartData = false;
+        },
+        //图表数据初始化
+        initChart(){
+            this.isLoadingChartData = true
+            this.isDrawerVisible = true;
+            this.getYearAndMonth();
+            this.getChartData();
+            this.isLoadingChartData = false;
+        },
         // 删除操作
         handleDelete(index, row) {
             const form = JSON.parse(JSON.stringify(this.form));
@@ -400,7 +409,6 @@ export default {
                         //此处处理表格变化
                         this.tableData.splice(index,1)
                         this.getTableData();
-                        this.updateChart();
                     } else {
                         ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
@@ -411,7 +419,7 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row) {
-            this.idx = index;
+            this.clickedIndex = index;
             this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
@@ -433,7 +441,6 @@ export default {
                             ElMessage.success(`编辑成功`);
                             //刷新表格
                             this.tableData[idx] = response.data.list;
-                            this.updateChart();
                         } else {
                             ElMessage.error(`编辑失败：` + response.message);
                         }
@@ -467,7 +474,6 @@ export default {
                         if (response.code === 200) {
                             ElMessage.success(`插入成功`);
                             this.getTableData()
-                            this.updateChart();
                         } else {
                             ElMessage.error(`插入失败：` + response.message);
                         }
