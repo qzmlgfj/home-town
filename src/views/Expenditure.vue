@@ -45,7 +45,7 @@
                     @click="handleInsert"
                     >新增</el-button
                 >
-                <el-button @click="initChart" type="success">查看报表</el-button>
+                <el-button icon="el-icon-data-analysis" @click="initChart" type="success">统计分析</el-button>
             </div>
             <!--表格区-->
             <el-table
@@ -106,6 +106,7 @@
             title="支出图表"
             v-model="isDrawerVisible"
             :direction="rtl"
+            size="40%"
             :before-close="handleDrawerClose" destroy-on-close>
             <div class="queryMonth">
                 <span style="margin: 10px">选择月份</span>
@@ -157,7 +158,7 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="备注">
-                    <el-input v-model="form.description"></el-input>
+                    <el-input type="textarea" v-model="form.description"></el-input>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -452,11 +453,7 @@ export default {
         },
         //处理新增操作
         handleInsert() {
-            const form = JSON.parse(JSON.stringify(this.form));;
-            //清空表单
-            Object.keys(form).forEach((item) => {
-                form[item] = "";
-            });
+            this.form = {};
             this.isInsert = true;
             this.editVisible = true;
         },
@@ -504,19 +501,9 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
 .mr10 {
     margin-right: 10px;
 }
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
-}
-
 .schart {
     width: 100%;
     height: 300px;

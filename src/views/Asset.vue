@@ -13,6 +13,7 @@
             <div class="handle-box">
                 <el-select
                     v-model="searchOption"
+                    @change="isAssetStateSelcted = searchOption === 'state';searchContent=''"
                     class="handle-select mr10"
                     placeholder="请选择"
                     filterable
@@ -25,7 +26,14 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-input  v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-select v-if="isAssetStateSelcted" v-model="searchContent" placeholder="请选择状态">
+                    <el-option
+                        v-for="item in assetStates"
+                        :label="item.assetState"
+                        :value="item.assetState">
+                    </el-option>
+                </el-select>
+                <el-input v-else v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -142,6 +150,7 @@ export default {
             searchOptions : [
                 { value:"asset_id", label : "资产编号"},
                 { value:"asset_value", label : "资产价值"},
+                { value:"state", label : "状态"},
             ],
             //用户选择的搜索项目
             searchOption : "",
@@ -155,6 +164,7 @@ export default {
             isUpdate : false,
             // 表单是否可见
             editVisible : false,
+            isProjectStateSelcted : false,
             //表单数据
             form : {
                 id:"",
@@ -382,16 +392,9 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
+
 .mr10 {
     margin-right: 10px;
 }
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
-}
+
 </style>

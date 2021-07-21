@@ -25,7 +25,8 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-input  v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-input v-model="searchContent" placeholder="输入搜索内容"
+                          class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -411,16 +412,9 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
+
 .mr10 {
     margin-right: 10px;
 }
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
-}
+
 </style>

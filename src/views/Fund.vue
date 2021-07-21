@@ -45,7 +45,7 @@
                     @click="handleInsert"
                     >新增</el-button
                 >
-                <el-button @click="initChart" type="success">查看报表</el-button>
+                <el-button icon="el-icon-data-analysis" @click="initChart" type="success">统计分析</el-button>
             </div>
             <!--表格区-->
             <el-table
@@ -101,6 +101,7 @@
             title="资金相关图表"
             v-model="isDrawerVisible"
             :direction="rtl"
+            size="40%"
             :before-close="handleDrawerClose" destroy-on-close>
             <div class="queryMonth">
                 <span style="margin: 10px">选择月份</span>

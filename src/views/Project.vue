@@ -13,6 +13,7 @@
             <div class="handle-box">
                 <el-select
                     v-model="searchOption"
+                    @change="isProjectStateSelcted = searchOption === 'state';searchContent=''"
                     class="handle-select mr10"
                     placeholder="请选择"
                     filterable
@@ -25,7 +26,14 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-input  v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-select  v-if="isProjectStateSelcted" v-model="searchContent" placeholder="请选择状态">
+                    <el-option
+                        v-for="item in projectStates"
+                        :label="item.projectState"
+                        :value="item.projectState">
+                    </el-option>
+                </el-select>
+                <el-input  v-else v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -140,6 +148,7 @@ export default {
                 { value:"project_id", label : "项目编号"},
                 { value:"project_name", label : "项目名称"},
                 { value:"principal", label : "负责人"},
+                { value:"state", label : "状态"},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -177,6 +186,7 @@ export default {
             isUpdate :false,
             // 表单是否可见
             editVisible : false,
+            isProjectStateSelcted:false,
         }
     },
     setup(){
@@ -205,7 +215,7 @@ export default {
                     data: query
                 }).then((response) => {
                     if (response.code === 200) {
-                        var data = response.data
+                        const data = response.data;
                         tableData.value = data.list
                         pageTotal.value = data.total
                     }
@@ -324,11 +334,7 @@ export default {
         },
         //处理新增操作
         handleInsert(){
-            const form = JSON.parse(JSON.stringify(this.form));
-            //清空表单
-            Object.keys(form).forEach((item) => {
-                form[item] = "";
-            });
+            this.form = {}
             this.isInsert = true
             this.editVisible = true
         },
@@ -376,16 +382,8 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
+
 .mr10 {
     margin-right: 10px;
-}
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
 }
 </style>
