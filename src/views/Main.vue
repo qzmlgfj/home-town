@@ -17,9 +17,9 @@
 
                     <div class="header-right">
                         <el-descriptions :title="userName">
-                            <el-descriptions-item label="手机号："
-                                >{{phoneNumber}}</el-descriptions-item
-                            >
+                            <el-descriptions-item label="手机号：">{{
+                                phoneNumber
+                            }}</el-descriptions-item>
                             <el-descriptions-item label="备注：">
                                 <el-tag size="small"> 普通用户 </el-tag>
                             </el-descriptions-item>
@@ -86,12 +86,12 @@
 
                                     <div v-for="item in items" :key="item">
                                         <div class="left-title">
-                                            <el-link
-                                                :href="item.link"
-                                                target="_blank"
+                                            <el-button
+                                                type="text"
+                                                @click="showArticle(item)"
                                             >
                                                 {{ item.title }}
-                                            </el-link>
+                                            </el-button>
                                         </div>
                                         <el-divider
                                             direction="vertical"
@@ -217,6 +217,10 @@
             </el-container>
         </div>
     </el-scrollbar>
+
+    <el-dialog title="查看文章" v-model="articleDialogVisible" width="70%">
+        <Markdown :source="articleContent" :breaks="true" />
+    </el-dialog>
 </template>
 
 <script>
@@ -226,10 +230,10 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessage, ElDialog } from "element-plus";
 import service from "../utils/request";
+import Markdown from "vue3-markdown-it";
 
 export default {
     name: "Main",
-
     setup() {
         let items = ref([]);
         let totalNum = ref(0);
@@ -270,11 +274,11 @@ export default {
         const showPolicy = () => {
             getData("廉政公开", "/publicity/query");
         };
-
         const logout = () => {
             localStorage.removeItem("ms_username");
             router.replace("/login");
         };
+        
         showAffair();
         return {
             items,
@@ -307,6 +311,8 @@ export default {
                 },
             ],
             dialogVisible: false,
+            articleDialogVisible: false,
+            articleContent: "# Test \n Hello!",
             form: {
                 name: "",
                 tel: "",
@@ -331,6 +337,7 @@ export default {
     },
     components: {
         ElButton,
+        Markdown,
     },
 
     methods: {
@@ -372,6 +379,23 @@ export default {
                     });
                 }
             });
+        },
+        getText(url,itemEntity){
+            service({
+                method: "post",
+                url: url,
+                data: itemEntity,
+            }).then((Response) => {
+                console.log(Response);
+                this.articleContent=Response.data.list.link;
+                ElMessage.success("good");
+            });
+        },
+        showArticle(item) {
+            this.articleDialogVisible = true;
+            if (this.mainpart === "三务公开") this.getText("/transaction/queryone",item);
+            else if (this.mainpart === "热点搜集公开") this.getText("/hotspot/queryone",item);
+            else this.getText("/publicity/queryone",item);
         },
     },
 };
