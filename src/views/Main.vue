@@ -219,7 +219,9 @@
     </el-scrollbar>
 
     <el-dialog title="查看文章" v-model="articleDialogVisible" width="70%">
-        <Markdown :source="articleContent" :breaks="true" />
+        <div class="markdown-body">
+            <Markdown :source="articleContent" :breaks="true" />
+        </div>
     </el-dialog>
 </template>
 
@@ -231,6 +233,7 @@ import { useRouter } from "vue-router";
 import { ElMessage, ElDialog } from "element-plus";
 import service from "../utils/request";
 import Markdown from "vue3-markdown-it";
+import "github-markdown-css";
 
 export default {
     name: "Main",
@@ -278,7 +281,7 @@ export default {
             localStorage.removeItem("ms_username");
             router.replace("/login");
         };
-        
+
         showAffair();
         return {
             items,
@@ -380,22 +383,24 @@ export default {
                 }
             });
         },
-        getText(url,itemEntity){
+        getText(url, itemEntity) {
             service({
                 method: "post",
                 url: url,
                 data: itemEntity,
             }).then((Response) => {
                 console.log(Response);
-                this.articleContent=Response.data.list.link;
+                this.articleContent = Response.data.list.link;
                 ElMessage.success("good");
             });
         },
         showArticle(item) {
             this.articleDialogVisible = true;
-            if (this.mainpart === "三务公开") this.getText("/transaction/queryone",item);
-            else if (this.mainpart === "热点搜集公开") this.getText("/hotspot/queryone",item);
-            else this.getText("/publicity/queryone",item);
+            if (this.mainpart === "三务公开")
+                this.getText("/transaction/queryone", item);
+            else if (this.mainpart === "热点搜集公开")
+                this.getText("/hotspot/queryone", item);
+            else this.getText("/publicity/queryone", item);
         },
     },
 };
