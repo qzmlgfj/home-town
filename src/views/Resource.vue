@@ -92,13 +92,13 @@
                    @closed="handleDialogClosed">
             <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="资源编号" prop="resourceId">
-                    <el-input v-model="form.resourceId"></el-input>
+                    <el-input v-model.number="form.resourceId"></el-input>
                 </el-form-item>
                 <el-form-item label="资源类型" prop="type">
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
                 <el-form-item label="价值" prop="resourceValue">
-                    <el-input v-model="form.resourceValue">
+                    <el-input v-model.number="form.resourceValue">
                         <template #prepend>￥</template>
                     </el-input>
                 </el-form-item>

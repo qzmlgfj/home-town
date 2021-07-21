@@ -90,9 +90,9 @@
         <!-- 编辑弹出框 -->
         <el-dialog title="项目信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
-            <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
+            <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="项目编号" prop="projectId">
-                    <el-input v-model="form.projectId"></el-input>
+                    <el-input v-model.number="form.projectId"></el-input>
                 </el-form-item>
                 <el-form-item label="项目名称" prop="projectName">
                     <el-input v-model="form.projectName"></el-input>
