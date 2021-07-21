@@ -326,9 +326,6 @@ export default {
     },
 
     methods: {
-        login() {
-            this.$router.push("/login");
-        },
         handleCurrentChange(val) {
             this.query.pageIndex = val;
         },
