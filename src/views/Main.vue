@@ -7,7 +7,7 @@
                         <div class="left-icon">
                             <el-avatar
                                 :size="50"
-                                src="../../favicon.png"
+                                src="https://pic.qzmlgfj.ml/images/2021/07/20/favicon.png"
                             ></el-avatar>
                         </div>
                         <div class="left-text">
@@ -16,9 +16,9 @@
                     </div>
 
                     <div class="header-right">
-                        <el-descriptions title="欢迎您，xxx">
+                        <el-descriptions :title="userName">
                             <el-descriptions-item label="手机号："
-                                >18100000000</el-descriptions-item
+                                >{{phoneNumber}}</el-descriptions-item
                             >
                             <el-descriptions-item label="备注：">
                                 <el-tag size="small"> 普通用户 </el-tag>
@@ -234,6 +234,8 @@ export default {
         let items = ref([]);
         let totalNum = ref(0);
         let mainpart = ref("三务公开");
+        const userName = ref("欢迎您，" + localStorage.getItem("ms_username"));
+        const phoneNumber = ref(localStorage.getItem("ms_userphone"));
         const router = useRouter();
         const query = {
             pageIndex: 1,
@@ -279,6 +281,8 @@ export default {
             totalNum,
             mainpart,
             query,
+            userName,
+            phoneNumber,
             getData,
             showAffair,
             showHotspot,
