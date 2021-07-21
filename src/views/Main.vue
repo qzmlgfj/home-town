@@ -24,7 +24,9 @@
                                 <el-tag size="small"> 普通用户 </el-tag>
                             </el-descriptions-item>
                             <el-descriptions-item>
-                                <el-button type="text">修改信息</el-button>
+                                <el-button type="text" @click="logout"
+                                    >退出登录</el-button
+                                >
                             </el-descriptions-item>
                         </el-descriptions>
                     </div>
@@ -232,6 +234,7 @@ export default {
         let items = ref([]);
         let totalNum = ref(0);
         let mainpart = ref("三务公开");
+        const router = useRouter();
         const query = {
             pageIndex: 1,
             pageSize: 7,
@@ -266,6 +269,10 @@ export default {
             getData("廉政公开", "/publicity/query");
         };
 
+        const logout = () => {
+            localStorage.removeItem("ms_username");
+            router.replace("/login");
+        };
         showAffair();
         return {
             items,
@@ -276,6 +283,7 @@ export default {
             showAffair,
             showHotspot,
             showPolicy,
+            logout,
         };
     },
     data() {
