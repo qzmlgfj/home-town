@@ -131,10 +131,8 @@ export default {
              * value值为数据库字段值,有空字段是为了全部查询用
              */
             searchOptions : [
-                { value:"contract_id", label : "合同编号"},
-                { value:"contract_name", label : "合同名称"},
-                { value:"part_a", label : "甲方"},
-                { value:"part_b", label : "乙方"},
+                { value:"hotspotId", label : "热点编号"},
+                { value:"title", label : "标题"},
             ],
             //用户选择的搜索项目
             searchOption:"",
