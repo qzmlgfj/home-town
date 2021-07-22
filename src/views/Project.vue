@@ -13,6 +13,7 @@
             <div class="handle-box">
                 <el-select
                     v-model="searchOption"
+                    @change="isProjectStateSelcted = searchOption === 'state';searchContent=''"
                     class="handle-select mr10"
                     placeholder="请选择"
                     filterable
@@ -25,7 +26,14 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-input  v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-select  v-if="isProjectStateSelcted" v-model="searchContent" placeholder="请选择状态">
+                    <el-option
+                        v-for="item in projectStates"
+                        :label="item.projectState"
+                        :value="item.projectState">
+                    </el-option>
+                </el-select>
+                <el-input  v-else v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -82,17 +90,17 @@
         <!-- 编辑弹出框 -->
         <el-dialog title="项目信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
-            <el-form label-width="70px">
-                <el-form-item label="项目编号">
-                    <el-input v-model="form.projectId"></el-input>
+            <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
+                <el-form-item label="项目编号" prop="projectId">
+                    <el-input v-model.number="form.projectId"></el-input>
                 </el-form-item>
-                <el-form-item label="项目名称">
+                <el-form-item label="项目名称" prop="projectName">
                     <el-input v-model="form.projectName"></el-input>
                 </el-form-item>
-                <el-form-item label="负责人">
+                <el-form-item label="项目负责人" prop="projectLeader">
                     <el-input v-model="form.principal"></el-input>
                 </el-form-item>
-                <el-form-item label="状态">
+                <el-form-item label="状态" prop="state">
                     <template #default="scope">
                         <el-select v-model="form.state" :placeholder="form.state">
                             <el-option
@@ -107,8 +115,8 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="editVisible = false">取 消</el-button>
-                    <el-button v-if="isUpdate" type="primary"  @click="saveUpdate">确 定</el-button>
-                    <el-button v-if="isInsert" type="primary"  @click="saveInsert">确 定</el-button>
+                    <el-button v-if="isUpdate" type="primary"  @click="saveUpdate('form')">确 定</el-button>
+                    <el-button v-if="isInsert" type="primary"  @click="saveInsert('form')">确 定</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -140,6 +148,7 @@ export default {
                 { value:"project_id", label : "项目编号"},
                 { value:"project_name", label : "项目名称"},
                 { value:"principal", label : "负责人"},
+                { value:"state", label : "状态"},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -153,6 +162,22 @@ export default {
                 principal:"",
                 state:"",
             },
+            formRules : {
+                projectId: [
+                    { required: true, message: '项目编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '项目编号只能为数字', trigger: 'change' },
+                ],
+                projectName: [
+                    { required: true, message: '项目名称不能为空', trigger: 'blur' },
+                ],
+                principal: [
+                    { required: true, message: '请输入项目负责人', trigger: 'blur' },
+                ],
+                state: [
+                    { required: true, message: '项目状态不能为空', trigger: 'change' },
+                    { required: true, message: '项目状态不能为空', trigger: 'blur' },
+                ],
+            },
             //用户点击的表格行索引
             idx : -1,
             // 标明为插入操作
@@ -161,6 +186,7 @@ export default {
             isUpdate :false,
             // 表单是否可见
             editVisible : false,
+            isProjectStateSelcted:false,
         }
     },
     setup(){
@@ -182,14 +208,14 @@ export default {
          * 方法区
          */
             // 从后端获取表格数据
-        const getData = () => {
+        const getTableData = () => {
                 service({
                     method : "post",
                     url : "/project/query",
                     data: query
                 }).then((response) => {
                     if (response.code === 200) {
-                        var data = response.data
+                        const data = response.data;
                         tableData.value = data.list
                         pageTotal.value = data.total
                     }
@@ -200,22 +226,22 @@ export default {
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
-            getData();
+            getTableData();
         };
         // 页面大小改变操作
         const handleSizeChange = (val) => {
             query.pageSize = val;
-            getData();
+            getTableData();
         };
         /**
          * 执行区，初始化时执行的方法
          */
-        getData()
+        getTableData()
         return {
             query,
             tableData,
             pageTotal,
-            getData,
+            getTableData,
             handleSizeChange,
             handlePageChange,
         };
@@ -251,12 +277,10 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
-            let form = this.form
+            const form = JSON.parse(JSON.stringify(this.form));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                //填充表单数据
-                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/project/delete",
@@ -266,7 +290,7 @@ export default {
                         ElMessage.success("删除成功");
                         //此处处理表格变化
                         this.tableData.splice(index,1)
-                        this.getData();
+                        this.getTableData();
                     } else {
                         ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
@@ -278,62 +302,64 @@ export default {
         //处理保存动作
         handleUpdate(index, row){
             this.idx = index;
-            this.form = this.tableData[index];
+            this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
-        saveUpdate(){
-            //必须先保存用户点击的索引
-            const idx = this.idx
-            let form = this.form
-            this.isUpdate = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url:"/project/update",
-                data : form,
-            }).then((response) => {
-                    if (response.code === 200) {
-                        //刷新表格
-                        this.tableData[idx] = response.data.list;
-                        ElMessage.success(`编辑成功`);
-                    } else {
-                        ElMessage.error(`编辑失败：` + response.message);
-                    }
-            }).catch((error) => {
-                ElMessage.error(`编辑失败：` + error);
+        saveUpdate(formName){
+            this.$refs[formName].validate((valid) => {
+                if(valid){
+                    const form = JSON.parse(JSON.stringify(this.form));
+                    let idx = this.clickedIndex
+                    this.isUpdate = false
+                    this.editVisible = false
+                    service({
+                        method : "post",
+                        url:"/project/update",
+                        data : form,
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`编辑成功`);
+                            //刷新表格
+                            this.tableData[idx] = response.data.list;
+                        } else {
+                            ElMessage.error(`编辑失败：` + response.message);
+                        }
+                    }).catch((error) => {
+                        ElMessage.error(`编辑失败：` + error);
+                    })
+                }
             })
         },
         //处理新增操作
         handleInsert(){
-            let form = this.form
-            //清空表单
-            Object.keys(form).forEach((item) => {
-                form[item] = "";
-            });
+            this.form = {}
             this.isInsert = true
             this.editVisible = true
         },
         // 保存新增数据到后端
-        saveInsert() {
-            let form = this.form
-            this.isInsert = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url : "/project/insert",
-                data : form
-            }).then((response) => {
-                if (response.code === 200) {
-                    ElMessage.success(`插入成功`);
-                    this.getData()
-                }else {
-                    ElMessage.error(`插入失败：` + response.message);
+        saveInsert(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    this.isInsert = false
+                    this.editVisible = false
+                    service({
+                        method: "post",
+                        url: "/project/insert",
+                        data: this.form
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`插入成功`);
+                            this.getTableData()
+                        } else {
+                            ElMessage.error(`插入失败：` + response.message);
+                        }
+                    }).catch(error => {
+                        ElMessage.error(`插入失败：` + error);
+                    })
                 }
-            }).catch(error => {
-                ElMessage.error(`插入失败：` + error);
-            })
+            });
         }
     }
 }
@@ -356,16 +382,8 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
+
 .mr10 {
     margin-right: 10px;
-}
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
 }
 </style>

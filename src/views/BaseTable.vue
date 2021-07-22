@@ -115,7 +115,7 @@
 
         <!-- 编辑弹出框 -->
         <el-dialog title="编辑" v-model="editVisible" width="30%">
-            <el-form label-width="70px">
+            <el-form label-width="80px">
                 <el-form-item label="用户名">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
@@ -152,23 +152,23 @@ export default {
         const tableData = ref([]);
         const pageTotal = ref(0);
         // 获取表格数据
-        const getData = () => {
+        const getTableData = () => {
             fetchData(query).then((res) => {
                 tableData.value = res.data.list;
                 pageTotal.value = res.data.pageTotal || 50;
             });
         };
-        getData();
+        getTableData();
 
         // 查询操作
         const handleSearch = () => {
             query.pageIndex = 1;
-            getData();
+            getTableData();
         };
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
-            getData();
+            getTableData();
         };
 
         // 删除操作

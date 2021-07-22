@@ -13,6 +13,7 @@
             <div class="handle-box">
                 <el-select
                     v-model="searchOption"
+                    @change="isResourceStateSelcted = searchOption === 'state';searchContent=''"
                     class="handle-select mr10"
                     placeholder="请选择"
                     filterable
@@ -25,7 +26,14 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-input  v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-select v-if="isResourceStateSelcted" v-model="searchContent" placeholder="请选择状态">
+                    <el-option
+                        v-for="item in resourceStates"
+                        :label="item.resourceState"
+                        :value="item.resourceState">
+                    </el-option>
+                </el-select>
+                <el-input  v-else v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -38,7 +46,7 @@
                       @selection-change="handleTableSelectionChange"
             >
                 <el-table-column prop="resourceId" label="资源编号"  sortable></el-table-column>
-                <el-table-column prop="type" label="类型"  sortable></el-table-column>
+                <el-table-column prop="type" label="资源类型"  sortable></el-table-column>
                 <el-table-column prop="resourceValue" label="价值" sortable></el-table-column>
                 <el-table-column label="状态" >
                     <template #default="scope">
@@ -82,19 +90,19 @@
         <!-- 编辑弹出框 -->
         <el-dialog title="资源信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
-            <el-form label-width="70px">
-                <el-form-item label="资源编号">
-                    <el-input v-model="form.resourceId"></el-input>
+            <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
+                <el-form-item label="资源编号" prop="resourceId">
+                    <el-input v-model.number="form.resourceId"></el-input>
                 </el-form-item>
-                <el-form-item label="类型">
+                <el-form-item label="资源类型" prop="type">
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="价值">
-                    <el-input v-model="form.resourceValue">
+                <el-form-item label="价值" prop="resourceValue">
+                    <el-input v-model.number="form.resourceValue">
                         <template #prepend>￥</template>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="状态">
+                <el-form-item label="状态" prop="state">
                     <template #default="scope">
                         <el-select v-model="form.state" :placeholder="form.state">
                             <el-option
@@ -109,8 +117,8 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="editVisible = false">取 消</el-button>
-                    <el-button v-if="isUpdate" type="primary"  @click="saveUpdate">确 定</el-button>
-                    <el-button v-if="isInsert" type="primary"  @click="saveInsert">确 定</el-button>
+                    <el-button v-if="isUpdate" type="primary"  @click="saveUpdate('form')">确 定</el-button>
+                    <el-button v-if="isInsert" type="primary"  @click="saveInsert('form')">确 定</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -141,6 +149,7 @@ export default {
             searchOptions : [
                 { value:"resource_id", label : "资源编号"},
                 { value:"resource_value", label : "价值"},
+                { value:"state", label : "状态"},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -154,14 +163,31 @@ export default {
                 type:"",
                 state:"",
             },
+            formRules : {
+                resourceId: [
+                    { required: true, message: '资源编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '资源编号只能为数字', trigger: 'change' },
+                ],
+                resourceValue: [
+                    { required: true, message: '资源价值不能为空', trigger: 'blur' },
+                    { type: 'number', message: '请输入数字', trigger: 'change' },
+                ],
+                type: [
+                    { required: true, message: '资源类型不能为空', trigger: 'blur' },
+                ],
+                state: [
+                    { required: true, message: '请选择资产状态', trigger: 'change' },
+                ],
+            },
             //用户点击的表格行索引
-            idx : -1,
+            clickedIndex : -1,
             // 标明为插入操作
             isInsert : false,
             // 标明为更新操作
             isUpdate :false,
             // 表单是否可见
             editVisible : false,
+            isResourceStateSelcted:false,
         }
     },
     setup(){
@@ -183,7 +209,7 @@ export default {
          * 方法区
          */
             // 从后端获取表格数据
-        const getData = () => {
+        const getTableData = () => {
                 service({
                     method : "post",
                     url: "/resource/query",
@@ -201,22 +227,22 @@ export default {
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
-            getData();
+            getTableData();
         };
         // 页面大小改变操作
         const handleSizeChange = (val) => {
             query.pageSize = val;
-            getData();
+            getTableData();
         };
         /**
          * 执行区，初始化时执行的方法
          */
-        getData()
+        getTableData()
         return {
             query,
             tableData,
             pageTotal,
-            getData,
+            getTableData,
             handleSizeChange,
             handlePageChange,
         };
@@ -233,7 +259,7 @@ export default {
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
-                    var data = response.data
+                    const data = response.data;
                     this.tableData = data.list
                     this.pageTotal = data.total
                 }
@@ -252,12 +278,10 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
-            let form = this.form
+            const form = JSON.parse(JSON.stringify(this.form));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
-                //填充表单数据
-                form = this.tableData[index];
                 service({
                     method : "post",
                     url : "/resource/delete",
@@ -267,7 +291,7 @@ export default {
                         ElMessage.success("删除成功");
                         //此处处理表格变化
                         this.tableData.splice(index,1)
-                        this.getData();
+                        this.getTableData();
                     } else {
                         ElMessage.error(`删除失败，错误信息:` + response.message);
                     }
@@ -278,32 +302,35 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row){
-            this.idx = index;
-            this.form = this.tableData[index];
+            this.clickedIndex = index;
+            this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
         },
         //保存更改到后端
-        saveUpdate(){
-            //必须先保存用户点击的索引
-            const idx = this.idx
-            const form = this.form
-            this.isUpdate = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url:"/resource/update",
-                data : form,
-            }).then((response) => {
-                if (response.code === 200) {
-                    //刷新表格
-                    this.tableData[idx] = response.data.list;
-                    ElMessage.success(`编辑成功`);
-                } else {
-                    ElMessage.error(`编辑失败：` + response.message);
+        saveUpdate(formName){
+            this.$refs[formName].validate((valid) => {
+                if(valid){
+                    const form = JSON.parse(JSON.stringify(this.form));
+                    let idx = this.clickedIndex
+                    this.isUpdate = false
+                    this.editVisible = false
+                    service({
+                        method : "post",
+                        url:"/resource/update",
+                        data : form,
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`编辑成功`);
+                            //刷新表格
+                            this.tableData[idx] = response.data.list;
+                        } else {
+                            ElMessage.error(`编辑失败：` + response.message);
+                        }
+                    }).catch((error) => {
+                        ElMessage.error(`编辑失败：` + error);
+                    })
                 }
-            }).catch((error) => {
-                ElMessage.error(`编辑失败：` + error);
             })
         },
         //处理新增操作
@@ -314,25 +341,28 @@ export default {
             this.editVisible = true
         },
         // 保存新增数据到后端
-        saveInsert() {
-            let form = this.form
-            this.isInsert = false
-            this.editVisible = false
-            service({
-                method : "post",
-                url : "/resource/insert",
-                data : form
-            }).then((response) => {
-                if (response.code === 200) {
-                    ElMessage.success(`插入成功`);
-                    this.getData()
-                }else {
-                    ElMessage.error(`插入失败：` + response.message);
+        saveInsert(formName){
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    this.isInsert = false
+                    this.editVisible = false
+                    service({
+                        method: "post",
+                        url: "/resource/insert",
+                        data: this.form
+                    }).then((response) => {
+                        if (response.code === 200) {
+                            ElMessage.success(`插入成功`);
+                            this.getTableData()
+                        } else {
+                            ElMessage.error(`插入失败：` + response.message);
+                        }
+                    }).catch(error => {
+                        ElMessage.error(`插入失败：` + error);
+                    })
                 }
-            }).catch(error => {
-                ElMessage.error(`插入失败：` + error);
-            })
-        }
+            });
+        },
     }
 }
 </script>

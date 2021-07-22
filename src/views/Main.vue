@@ -17,14 +17,16 @@
 
                     <div class="header-right">
                         <el-descriptions :title="userName">
-                            <el-descriptions-item label="手机号："
-                                >{{phoneNumber}}</el-descriptions-item
-                            >
+                            <el-descriptions-item label="手机号：">{{
+                                phoneNumber
+                            }}</el-descriptions-item>
                             <el-descriptions-item label="备注：">
                                 <el-tag size="small"> 普通用户 </el-tag>
                             </el-descriptions-item>
                             <el-descriptions-item>
-                                <el-button type="text">修改信息</el-button>
+                                <el-button type="text" @click="logout"
+                                    >退出登录</el-button
+                                >
                             </el-descriptions-item>
                         </el-descriptions>
                     </div>
@@ -84,12 +86,12 @@
 
                                     <div v-for="item in items" :key="item">
                                         <div class="left-title">
-                                            <el-link
-                                                :href="item.link"
-                                                target="_blank"
+                                            <el-button
+                                                type="text"
+                                                @click="showArticle(item)"
                                             >
                                                 {{ item.title }}
-                                            </el-link>
+                                            </el-button>
                                         </div>
                                         <el-divider
                                             direction="vertical"
@@ -165,7 +167,7 @@
                                     placeholder="请填写手机号码"
                                 ></el-input>
                             </el-form-item>
-                            <el-form-item label="满意度评价1">
+                            <el-form-item label="实时性评价">
                                 <div class="form-rate">
                                     <el-rate
                                         v-model="form.comment1"
@@ -173,7 +175,7 @@
                                     />
                                 </div>
                             </el-form-item>
-                            <el-form-item label="满意度评价2">
+                            <el-form-item label="公开度评价">
                                 <div class="form-rate">
                                     <el-rate
                                         v-model="form.comment2"
@@ -181,7 +183,7 @@
                                     />
                                 </div>
                             </el-form-item>
-                            <el-form-item label="满意度评价3">
+                            <el-form-item label="真实性评价">
                                 <div class="form-rate">
                                     <el-rate
                                         v-model="form.comment3"
@@ -215,23 +217,30 @@
             </el-container>
         </div>
     </el-scrollbar>
+
+    <el-dialog title="查看文章" v-model="articleDialogVisible" width="70%">
+        <div class="markdown-body">
+            <Markdown :source="articleContent" :breaks="true" />
+        </div>
+    </el-dialog>
 </template>
 
 <script>
 import { ElButton } from "element-plus";
-import { ref, reactive } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { ElMessage, ElDialog } from "element-plus";
+import { ref} from "vue";
+import { ElMessage} from "element-plus";
 import service from "../utils/request";
+import Markdown from "vue3-markdown-it";
 
 export default {
     name: "Main",
-
     setup() {
         let items = ref([]);
         let totalNum = ref(0);
         let mainpart = ref("三务公开");
+        const userName = ref("欢迎您，" + localStorage.getItem("ms_username"));
+        const phoneNumber = ref(localStorage.getItem("ms_userphone"));
+        const router = useRouter();
         const query = {
             pageIndex: 1,
             pageSize: 7,
@@ -265,8 +274,10 @@ export default {
         const showPolicy = () => {
             getData("廉政公开", "/publicity/query");
         };
-        const userName = ref("欢迎您，"+localStorage.getItem("ms_username"));
-        const phoneNumber = ref(localStorage.getItem("ms_userphone"));
+        const logout = () => {
+            localStorage.removeItem("ms_username");
+            router.replace("/login");
+        };
 
         showAffair();
         return {
@@ -280,6 +291,7 @@ export default {
             showAffair,
             showHotspot,
             showPolicy,
+            logout,
         };
     },
     data() {
@@ -299,6 +311,8 @@ export default {
                 },
             ],
             dialogVisible: false,
+            articleDialogVisible: false,
+            articleContent: "# Test \n Hello!",
             form: {
                 name: "",
                 tel: "",
@@ -323,9 +337,13 @@ export default {
     },
     components: {
         ElButton,
+        Markdown,
     },
 
     methods: {
+        login() {
+            this.$router.push("/login");
+        },
         handleCurrentChange(val) {
             this.query.pageIndex = val;
         },
@@ -341,7 +359,10 @@ export default {
             let formdata = {
                 evaluationId: this.form.tel,
                 evaluator: this.form.name,
-                satisfaction: this.form.comment1,
+                satisfaction:
+                    this.form.comment1 +
+                    this.form.comment2 +
+                    this.form.comment3,
                 comment: this.form.extra,
             };
             service({
@@ -358,6 +379,25 @@ export default {
                     });
                 }
             });
+        },
+        getText(url, itemEntity) {
+            service({
+                method: "post",
+                url: url,
+                data: itemEntity,
+            }).then((Response) => {
+                console.log(Response);
+                this.articleContent = Response.data.list.link;
+                ElMessage.success("good");
+            });
+        },
+        showArticle(item) {
+            this.articleDialogVisible = true;
+            if (this.mainpart === "三务公开")
+                this.getText("/transaction/queryone", item);
+            else if (this.mainpart === "热点搜集公开")
+                this.getText("/hotspot/queryone", item);
+            else this.getText("/publicity/queryone", item);
         },
     },
 };
@@ -431,4 +471,5 @@ export default {
     margin-top: 2%;
     margin-left: 3%;
 }
+@import "github-markdown-css";
 </style>
