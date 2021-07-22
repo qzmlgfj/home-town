@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i>合同管理
+                    <i class="el-icon-lx-cascades"></i>热点信息管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -43,82 +43,64 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="contractId" label="合同编号"  sortable></el-table-column>
-                <el-table-column prop="partA" label="甲方" sortable></el-table-column>
-                <el-table-column prop="partB" label="乙方" sortable></el-table-column>
-                <el-table-column prop="contractName" label="合同名称"  sortable></el-table-column>
-                <el-table-column prop="startDate" label="开始时间"  sortable>
-                    <template #default="scope">{{scope.row.startDate}}</template>
-                </el-table-column>
-                <el-table-column prop="deadLine" label="结束时间"  sortable>
-                    <template #default="scope">{{scope.row.deadLine}}</template>
-                </el-table-column>
-                <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{scope.row.createTime}}</template>
-                </el-table-column>
-                <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{scope.row.updateTime}}</template>
-                </el-table-column>
+                <el-table-column prop="hotspotId" label="编号"  sortable></el-table-column>
+                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="title" label="标题" sortable></el-table-column>
+                <el-table-column prop="releaseDate" label="发布日期"  sortable></el-table-column>
+                <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
+                <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
-                            size="mini"
-                            @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
+                                size="mini"
+                                @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
                         <el-button
-                            size="mini"
-                            type="danger"
-                            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                                size="mini"
+                                type="danger"
+                                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
             <!--分页组件-->
             <div class="pagination">
                 <el-pagination
-                    background
-                    layout="total, prev, pager, next, sizes"
-                    :current-page="query.pageIndex"
-                    :page-size="query.pageSize"
-                    :total="pageTotal"
-                    :page-sizes="[5, 10, 15, 20]"
-                    @current-change="handlePageChange"
-                    @size-change="handleSizeChange"></el-pagination>
+                        background
+                        layout="total, prev, pager, next, sizes"
+                        :current-page="query.pageIndex"
+                        :page-size="query.pageSize"
+                        :total="pageTotal"
+                        :page-sizes="[5, 10, 15, 20]"
+                        @current-change="handlePageChange"
+                        @size-change="handleSizeChange"></el-pagination>
             </div>
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="合同信息" v-model="editVisible" width="30%"
+        <el-dialog title="合同信息" v-model="editVisible" width="70%"
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
-                <el-form-item label="合同编号" prop="contractId">
-                    <el-input v-model.number="form.contractId"></el-input>
+                <el-form-item label="编号" prop="hotspotId">
+                    <el-input v-model.number="form.hotspotId"></el-input>
                 </el-form-item>
-                <el-form-item label="合同名称" prop="contractName">
-                    <el-input v-model="form.contractName"></el-input>
+                <el-form-item label="类型" prop="type">
+                    <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="甲方" prop="partA">
-                    <el-input v-model="form.partA"></el-input>
+                <el-form-item label="标题" prop="title">
+                    <el-input v-model="form.title"></el-input>
                 </el-form-item>
-                <el-form-item label="乙方" prop="partB">
-                    <el-input v-model="form.partB"></el-input>
-                </el-form-item>
-                <el-form-item label="开始日期" prop="startDate">
+                <el-form-item label="发布日期" prop="releaseDate">
                     <el-date-picker
-                        v-model="form.startDate"
-                        type="date"
-                        format="YYYY 年 MM 月 DD 日"
-                        placeholder="请选择开始日期"
-                        value-format="YYYY-MM-DD">
+                            v-model="form.releaseDate"
+                            type="date"
+                            format="YYYY 年 MM 月 DD 日"
+                            placeholder="请选择日期"
+                            value-format="YYYY-MM-DD">
                     </el-date-picker>
                 </el-form-item>
-                <el-form-item label="结束日期" prop="deadLine">
-                    <el-date-picker
-                        v-model="form.deadLine"
-                        type="date"
-                        format="YYYY 年 MM 月 DD 日"
-                        placeholder="请选择结束日期"
-                        value-format="YYYY-MM-DD">
-                    </el-date-picker>
+                <el-form-item label="正文" prop="link">
+                    <md-editor v-model="form.link" ></md-editor>
                 </el-form-item>
+
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -135,36 +117,14 @@
 import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import service from "../utils/request";
-
+import MdEditor from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
 export default {
-    name: "asset-table",
+    name: "hotspot",
+    components: {
+        MdEditor
+    },
     data() {
-        const checkStartDate = (rule, value, callback) => {
-            if (value === ''){
-                callback(new Error('请选择开始日期'));
-            }
-            const startDate = new Date(value);
-            if (this.form.deadLine !== '') {
-                const deadLine = new Date(this.form.deadLine);
-                if(startDate.getTime() > deadLine.getTime()){
-                    callback(new Error('开始日期须小于或等于结束日期'));
-                }
-            }
-            callback()
-        };
-        const checkDeadLine = (rule, value, callback) => {
-            if (value === ''){
-                callback(new Error('请选择结束日期'));
-            }
-            const deadLine = new Date(value);
-            if (this.form.startLine !== '') {
-                const startDate = new Date(this.form.startDate);
-                if(startDate.getTime() > deadLine.getTime()){
-                    callback(new Error('结束日期须大于或等于开始日期'));
-                }
-            }
-            callback()
-        };
         return {
             /**
              * 搜索选项，选择后value值会绑定到searchOption中
@@ -183,35 +143,26 @@ export default {
             //表单数据
             form:{
                 id:"",
-                contractId:"",
-                contractName:"",
-                partA:"",
-                partB:"",
-                startDate:"",
-                deadLine:"",
+                hotspotId:"",
+                type:"",
+                title:"",
+                link:"",
+                releaseDate:"",
             },
             formRules : {
-                contractId: [
-                    { required: true, message: '合同编号不能为空', trigger: 'blur' },
-                    { type: 'number', message: '合同编号只能为数字', trigger: 'change' },
+                hotspotId: [
+                    { required: true, message: '编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '编号只能为数字', trigger: 'change' },
                 ],
-                contractName: [
-                    { required: true, message: '合同名称不能为空', trigger: 'blur' },
+                type: [
+                    { required: true, message: '类型不能为空', trigger: 'blur' },
                 ],
-                partA: [
-                    { required: true, message: '请填写甲方名称', trigger: 'blur' },
+                title: [
+                    { required: true, message: '请填写标题', trigger: 'blur' },
                 ],
-                partB: [
-                    { required: true, message: '请填写乙方名称', trigger: 'blur' },
+                releaseDate: [
+                    { required: true, message: '请选择发布日期', trigger: 'blur' },
                 ],
-                startDate: [
-                    { required: true, validator: checkStartDate, trigger: 'blur' },
-                    { required: true, validator: checkStartDate, trigger: 'change' }
-                ],
-                deadLine: [
-                    { required: true, validator: checkDeadLine, trigger: 'blur' },
-                    { required: true, validator: checkDeadLine, trigger: 'change' }
-                ]
             },
             //用户点击的表格行索引
             clickedIndex : -1,
@@ -227,7 +178,7 @@ export default {
         /**
          * 数据区
          */
-        // 查询时的数据
+            // 查询时的数据
         let query = {
                 fieldName:"",
                 fieldValue:"",
@@ -242,12 +193,12 @@ export default {
         /**
          * 方法区
          */
-        //获取表格数据
+            //获取表格数据
         const getTableData = () => {
                 isLoadingTableData.value = true;
                 service({
                     method : "post",
-                    url: "/contract/query",
+                    url: "/hotspot/query",
                     data : query
                 }).then((response) => {
                     if (response.code === 200) {
@@ -292,7 +243,7 @@ export default {
             query.fieldValue = this.searchContent
             service({
                 method : "post",
-                url : "/contract/query",
+                url : "/hotspot/query",
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
@@ -320,7 +271,7 @@ export default {
             }).then(() => {
                 service({
                     method : "post",
-                    url : "/contract/delete",
+                    url : "/hotspot/delete",
                     data : form
                 }).then((response) => {
                     if (response.code === 200) {
@@ -338,10 +289,24 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row){
-            this.clickedIndex = index;
-            this.form = JSON.parse(JSON.stringify(this.tableData[index]));
-            this.isUpdate = true
-            this.editVisible = true
+            service({
+                method : "post",
+                url:"/hotspot/queryone",
+                data : this.tableData[index],
+            }).then((response) => {
+                if (response.code === 200) {
+                    console.log(response)
+                    ElMessage.success(`编辑成功`);
+                    //刷新表格
+                    this.form = response.data.list;
+                    this.isUpdate = true
+                    this.editVisible = true
+                } else {
+                    ElMessage.error(`编辑失败：` + response.message);
+                }
+            }).catch((error) => {
+                ElMessage.error(`编辑失败：` + error);
+            })
         },
         //保存更改到后端
         saveUpdate(formName){
@@ -353,7 +318,7 @@ export default {
                     this.editVisible = false
                     service({
                         method : "post",
-                        url:"/contract/update",
+                        url:"/hotspot/update",
                         data : form,
                     }).then((response) => {
                         if (response.code === 200) {
@@ -385,7 +350,7 @@ export default {
                     this.editVisible = false
                     service({
                         method: "post",
-                        url: "/contract/insert",
+                        url: "/hotspot/insert",
                         data: form
                     }).then((response) => {
                         if (response.code === 200) {
