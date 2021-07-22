@@ -227,10 +227,8 @@
 
 <script>
 import { ElButton } from "element-plus";
-import { ref, reactive } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { ElMessage, ElDialog } from "element-plus";
+import { ref} from "vue";
+import { ElMessage} from "element-plus";
 import service from "../utils/request";
 import Markdown from "vue3-markdown-it";
 
