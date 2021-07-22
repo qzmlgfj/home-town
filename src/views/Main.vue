@@ -231,6 +231,7 @@ import { ref} from "vue";
 import { ElMessage} from "element-plus";
 import service from "../utils/request";
 import Markdown from "vue3-markdown-it";
+import {useRouter} from "vue-router";
 
 export default {
     name: "Main",
