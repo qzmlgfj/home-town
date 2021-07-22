@@ -13,7 +13,7 @@
             <div class="handle-box">
                 <el-select
                     v-model="searchOption"
-                    @change="isAssetStateSelcted = searchOption === 'state';searchContent=''"
+                    @change="isAssetStateSelected = searchOption === 'state';searchContent=''"
                     class="handle-select mr10"
                     placeholder="请选择"
                     filterable
@@ -26,7 +26,7 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-select v-if="isAssetStateSelcted" v-model="searchContent" placeholder="请选择状态">
+                <el-select v-if="isAssetStateSelected" v-model="searchContent" placeholder="请选择状态">
                     <el-option
                         v-for="item in assetStates"
                         :label="item.assetState"
@@ -39,6 +39,8 @@
             </div>
             <!--表格区-->
             <el-table :data="tableData"
+                      v-loading="isLoadingTableData"
+                      element-loading-text="数据加载中"
                       class="table"
                       ref="multipleTable"
                       header-cell-class-name="table-header"
@@ -90,20 +92,19 @@
         <!-- 编辑弹出框 -->
         <el-dialog title="资产信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
-            <el-form label-width="80px" :model="form" :rules="formRules" ref="form"
-                     hide-required-asterisk>
-                <el-form-item label="资产编号" prop="assetId" inline-message>
+            <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
+                <el-form-item label="资产编号" prop="assetId">
                     <el-input v-model.number="form.assetId"></el-input>
                 </el-form-item>
-                <el-form-item label="资产类型" prop="type" inline-message>
+                <el-form-item label="资产类型" prop="type" >
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="资产价值" prop="assetValue" inline-message>
+                <el-form-item label="资产价值" prop="assetValue">
                     <el-input v-model.number="form.assetValue">
                         <template #prepend>￥</template>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="资产状态" prop="state" inline-message>
+                <el-form-item label="资产状态" prop="state">
                     <template #default="scope">
                         <el-select v-model="form.state" :placeholder="form.state">
                             <el-option
@@ -164,7 +165,7 @@ export default {
             isUpdate : false,
             // 表单是否可见
             editVisible : false,
-            isProjectStateSelcted : false,
+            isProjectStateSelected : false,
             //表单数据
             form : {
                 id:"",
@@ -186,7 +187,7 @@ export default {
                     { type: 'number', message: '请输入数字', trigger: 'change' },
                 ],
                 state: [
-                    { required: true, message: '请选择资产状态', trigger: 'change' },
+                    { required: true, message: '请选择资产状态', trigger: 'blur' },
                 ],
                 startDate:[
                     { required:true, message:'请选择开始日期',trigger: 'blur'}
@@ -209,23 +210,26 @@ export default {
                 pageSize: 5,
             });
         // 表格当前页数据
-        let tableData = ref([]);
+        const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
+        const isLoadingTableData = ref(true);
         /**
          * 方法区
          */
         // 从后端获取表格数据
         const getTableData = () => {
+            isLoadingTableData.value = true;
             service({
                 method : "post",
                 url: "/asset/query",
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
-                    var data = response.data
+                    const data = response.data;
                     tableData.value = data.list
                     pageTotal.value = data.total
+                    isLoadingTableData.value = false;
                 }
             }).catch((error) => {
                 ElMessage.error("加载数据失败：" + error)
@@ -249,6 +253,7 @@ export default {
             query,
             tableData,
             pageTotal,
+            isLoadingTableData,
             getTableData,
             handleSizeChange,
             handlePageChange,
