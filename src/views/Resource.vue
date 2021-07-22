@@ -178,7 +178,7 @@ export default {
                     { required: true, message: '资源类型不能为空', trigger: 'blur' },
                 ],
                 state: [
-                    { required: true, message: '请选择资产状态', trigger: 'change' },
+                    { required: true, message: '请选择资产状态', trigger: 'blur' },
                 ],
             },
             //用户点击的表格行索引
@@ -390,16 +390,8 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
+
 .mr10 {
     margin-right: 10px;
-}
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
 }
 </style>
