@@ -404,6 +404,8 @@ export default {
 </script>
 
 <style scoped>
+@import "github-markdown-css";
+
 .header-left {
     background-color: rgb(252, 253, 253);
     height: 70px;
@@ -471,5 +473,4 @@ export default {
     margin-top: 2%;
     margin-left: 3%;
 }
-@import "github-markdown-css";
 </style>
