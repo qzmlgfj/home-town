@@ -76,7 +76,7 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="合同信息" v-model="editVisible" width="70%"
+        <el-dialog title="热点信息" v-model="editVisible" width="70%"
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="编号" prop="hotspotId">
@@ -131,7 +131,7 @@ export default {
              * value值为数据库字段值,有空字段是为了全部查询用
              */
             searchOptions : [
-                { value:"hotspotId", label : "热点编号"},
+                { value:"hotspot_id", label : "编号"},
                 { value:"title", label : "标题"},
             ],
             //用户选择的搜索项目
