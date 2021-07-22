@@ -13,7 +13,7 @@
             <div class="handle-box">
                 <el-select
                     v-model="searchOption"
-                    @change="isProjectStateSelcted = searchOption === 'state';searchContent=''"
+                    @change="isProjectStateSelected = searchOption === 'state';searchContent=''"
                     class="handle-select mr10"
                     placeholder="请选择"
                     filterable
@@ -26,7 +26,7 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-select  v-if="isProjectStateSelcted" v-model="searchContent" placeholder="请选择状态">
+                <el-select  v-if="isProjectStateSelected" v-model="searchContent" placeholder="请选择状态">
                     <el-option
                         v-for="item in projectStates"
                         :label="item.projectState"
@@ -39,6 +39,8 @@
             </div>
             <!--表格区-->
             <el-table :data="tableData"
+                      v-loading="isLoadingTableData"
+                      element-loading-text="数据加载中"
                       class="table"
                       ref="multipleTable"
                       header-cell-class-name="table-header"
@@ -174,7 +176,6 @@ export default {
                     { required: true, message: '请输入项目负责人', trigger: 'blur' },
                 ],
                 state: [
-                    { required: true, message: '项目状态不能为空', trigger: 'change' },
                     { required: true, message: '项目状态不能为空', trigger: 'blur' },
                 ],
             },
@@ -186,7 +187,7 @@ export default {
             isUpdate :false,
             // 表单是否可见
             editVisible : false,
-            isProjectStateSelcted:false,
+            isProjectStateSelected:false,
         }
     },
     setup(){
@@ -204,11 +205,13 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
+        const isLoadingTableData = ref(true);
         /**
          * 方法区
          */
             // 从后端获取表格数据
         const getTableData = () => {
+                isLoadingTableData.value = true;
                 service({
                     method : "post",
                     url : "/project/query",
@@ -218,6 +221,7 @@ export default {
                         const data = response.data;
                         tableData.value = data.list
                         pageTotal.value = data.total
+                        isLoadingTableData.value = false;
                     }
                 }).catch((error) => {
                     ElMessage.error("加载数据失败：" + error)
@@ -241,6 +245,7 @@ export default {
             query,
             tableData,
             pageTotal,
+            isLoadingTableData,
             getTableData,
             handleSizeChange,
             handlePageChange,

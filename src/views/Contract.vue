@@ -11,27 +11,32 @@
             <!-- 上方按钮区-->
             <!--搜索框-->
             <div class="handle-box">
-                <el-select
-                    v-model="searchOption"
-                    class="handle-select mr10"
-                    placeholder="请选择"
-                    filterable
-                    loading-text="数据加载中"
-                    no-match-text="未找到匹配数据"
-                    no-data-text="请选择">
-                    <el-option
-                        v-for="item in searchOptions"
-                        :value="item.value"
-                        :label="item.label">
-                    </el-option>
-                </el-select>
                 <el-input v-model="searchContent" placeholder="输入搜索内容"
-                          class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                          class="handle-input mr10" @keyup.enter="handleSearch">
+                    <template #prepend>
+                        <el-select
+                                v-model="searchOption"
+                                class="handle-select mr10"
+                                placeholder="请选择"
+                                filterable
+                                loading-text="数据加载中"
+                                no-match-text="未找到匹配数据"
+                                no-data-text="请选择">
+                            <el-option
+                                    v-for="item in searchOptions"
+                                    :value="item.value"
+                                    :label="item.label">
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
             <!--表格区-->
             <el-table :data="tableData"
+                      v-loading="isLoadingTableData"
+                      element-loading-text="数据加载中"
                       class="table"
                       ref="multipleTable"
                       header-cell-class-name="table-header"
@@ -83,7 +88,7 @@
         <!-- 编辑弹出框 -->
         <el-dialog title="合同信息" v-model="editVisible" width="30%"
                    @closed="handleDialogClosed">
-            <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
+            <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="合同编号" prop="contractId">
                     <el-input v-model.number="form.contractId"></el-input>
                 </el-form-item>
@@ -191,7 +196,7 @@ export default {
                     { type: 'number', message: '合同编号只能为数字', trigger: 'change' },
                 ],
                 contractName: [
-                    { required: true, message: '合同类型不能为空', trigger: 'blur' },
+                    { required: true, message: '合同名称不能为空', trigger: 'blur' },
                 ],
                 partA: [
                     { required: true, message: '请填写甲方名称', trigger: 'blur' },
@@ -200,12 +205,12 @@ export default {
                     { required: true, message: '请填写乙方名称', trigger: 'blur' },
                 ],
                 startDate: [
-                    { validator: checkDeadLine, trigger: 'blur' },
-                    { validator: checkStartDate, trigger: 'change' }
+                    { required: true, validator: checkStartDate, trigger: 'blur' },
+                    { required: true, validator: checkStartDate, trigger: 'change' }
                 ],
                 deadLine: [
-                    { validator: checkDeadLine, trigger: 'blur' },
-                    { validator: checkDeadLine, trigger: 'change' }
+                    { required: true, validator: checkDeadLine, trigger: 'blur' },
+                    { required: true, validator: checkDeadLine, trigger: 'change' }
                 ]
             },
             //用户点击的表格行索引
@@ -233,11 +238,13 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
+        const isLoadingTableData = ref(true);
         /**
          * 方法区
          */
         //获取表格数据
         const getTableData = () => {
+                isLoadingTableData.value = true;
                 service({
                     method : "post",
                     url: "/contract/query",
@@ -247,6 +254,7 @@ export default {
                         const data = response.data;
                         tableData.value = data.list
                         pageTotal.value = data.total
+                        isLoadingTableData.value = false;
                     }
                 }).catch((error) => {
                     ElMessage.error("加载数据失败：" + error)
@@ -270,6 +278,7 @@ export default {
             query,
             tableData,
             pageTotal,
+            isLoadingTableData,
             getTableData,
             handleSizeChange,
             handlePageChange,
@@ -405,8 +414,7 @@ export default {
 }
 
 .handle-input {
-    width: 300px;
-    display: inline-block;
+    width: 500px;
 }
 .table {
     width: 100%;

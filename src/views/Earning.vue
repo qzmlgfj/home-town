@@ -11,19 +11,26 @@
             <!-- 上方按钮区-->
             <!--搜索框-->
             <div class="handle-box">
-                <el-select v-model="searchOption" class="handle-select mr10" filterable
-                    placeholder="请选择" loading-text="数据加载中" no-match-text="未找到匹配数据" no-data-text="请选择">
-                    <el-option v-for="item in searchOptions"
-                               :value="item.value" :label="item.label">
-                    </el-option>
-                </el-select>
-                <el-input v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-input v-model="searchContent" placeholder="输入搜索内容"
+                          class="handle-input mr10" @keyup.enter="handleSearch">
+                    <template #prepend>
+                        <el-select v-model="searchOption" class="handle-select mr10" filterable
+                                   placeholder="请选择" loading-text="数据加载中" no-match-text="未找到匹配数据" no-data-text="请选择">
+                            <el-option v-for="item in searchOptions"
+                                       :value="item.value" :label="item.label">
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
                 <el-button icon="el-icon-data-analysis" @click="initChart" type="success">统计分析</el-button>
             </div>
             <!--表格区-->
-            <el-table :data="tableData" class="table" ref="multipleTable" header-cell-class-name="table-header"
+            <el-table :data="tableData"
+                      v-loading="isLoadingTableData"
+                      element-loading-text="数据加载中"
+                      class="table" ref="multipleTable" header-cell-class-name="table-header"
                 border highlight-current-row @selection-change="handleTableSelectionChange">
                 <el-table-column prop="itemId" label="收入编号" sortable></el-table-column>
                 <el-table-column prop="type" label="收入类型" sortable></el-table-column>
@@ -250,11 +257,13 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
+        const isLoadingTableData = ref(true);
         /**
          * 方法区
          */
         // 从后端获取表格数据
         const getTableData = () => {
+            isLoadingTableData.value = true;
             service({
                 method: "post",
                 url: "/earning/query",
@@ -264,6 +273,7 @@ export default {
                     const data = response.data;
                     tableData.value = data.list
                     pageTotal.value = data.total
+                    isLoadingTableData.value = false;
                 }
             }).catch((error) => {
                 ElMessage.error("加载数据失败：" + error);
@@ -287,6 +297,7 @@ export default {
             query,
             tableData,
             pageTotal,
+            isLoadingTableData,
             getTableData,
             handleSizeChange,
             handlePageChange,
@@ -455,8 +466,7 @@ export default {
 }
 
 .handle-input {
-    width: 300px;
-    display: inline-block;
+    width: 500px;
 }
 .table {
     width: 100%;

@@ -90,6 +90,15 @@ const routes = [
                 component: () => import("../views/Contract.vue")
             },
             {
+                path: "hotspot",
+                name: "hotspot",
+                meta: {
+                    title: '热点信息管理',
+                    permission: true
+                },
+                component: () => import("../views/Hotspot.vue")
+            },
+            {
                 path: '404',
                 name: '404',
                 meta: {

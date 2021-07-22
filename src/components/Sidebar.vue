@@ -96,6 +96,11 @@ export default {
                 icon: "el-icon-collection",
                 index: "/admin/contract",
                 title: "合同管理",
+            },
+            {
+                icon: "el-icon-collection",
+                index: "/admin/hotspot",
+                title: "热点信息管理",
             }
         ];
 

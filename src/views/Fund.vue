@@ -11,45 +11,36 @@
             <!-- 上方按钮区-->
             <!--搜索框-->
             <div class="handle-box">
-                <el-select
-                    v-model="searchOption"
-                    class="handle-select mr10"
-                    placeholder="请选择"
-                    filterable
-                    loading-text="数据加载中"
-                    no-match-text="未找到匹配数据"
-                    no-data-text="请选择"
-                >
-                    <el-option
-                        v-for="item in searchOptions"
-                        :value="item.value"
-                        :label="item.label"
-                    >
-                    </el-option>
-                </el-select>
-                <el-input
-                    v-model="searchContent"
-                    placeholder="输入搜索内容"
-                    class="handle-input mr10"
-                    @keyup.enter="handleSearch"
-                ></el-input>
-                <el-button
-                    type="primary"
-                    icon="el-icon-search"
-                    @click="handleSearch"
-                    >搜索</el-button
-                >
-                <el-button
-                    type="primary"
-                    icon="el-icon-plus"
-                    @click="handleInsert"
-                    >新增</el-button
-                >
+                <el-input v-model="searchContent" placeholder="输入搜索内容"
+                    class="handle-input mr10" @keyup.enter="handleSearch">
+                    <template #prepend>
+                        <el-select
+                                v-model="searchOption"
+                                class="handle-select mr10"
+                                placeholder="请选择"
+                                filterable
+                                loading-text="数据加载中"
+                                no-match-text="未找到匹配数据"
+                                no-data-text="请选择"
+                        >
+                            <el-option
+                                    v-for="item in searchOptions"
+                                    :value="item.value"
+                                    :label="item.label"
+                            >
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-input>
+                <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+                <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
                 <el-button icon="el-icon-data-analysis" @click="initChart" type="success">统计分析</el-button>
             </div>
             <!--表格区-->
             <el-table
                 :data="tableData"
+                v-loading="isLoadingTableData"
+                element-loading-text="数据加载中"
                 class="table"
                 ref="multipleTable"
                 header-cell-class-name="table-header"
@@ -114,14 +105,12 @@
                 ></el-input-number>
             </div>
             <el-card v-loading ="isLoadingChartData"
-                     element-loading-text="拼命加载中">
+                     element-loading-text="图表加载中">
                 <schart
                     class="schart"
                     canvasId="canvas"
                     :options="chartData"
                     :key="chartKey"
-                    v-loading="isLoadingChartData"
-                    element-loading-text="拼命加载中"
                 />
             </el-card>
         </el-drawer>
@@ -133,14 +122,14 @@
             width="30%"
             @closed="handleDialogClosed"
         >
-            <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
+            <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="资金编号" prop="fundId">
                     <el-input v-model.number="form.fundId"></el-input>
                 </el-form-item>
                 <el-form-item label="资金类型" prop="type">
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="金额" prop="money">
+                <el-form-item label="金额" prop="fundValue">
                     <el-input v-model.number="form.fundValue">
                         <template #prepend>￥</template>
                     </el-input>
@@ -190,14 +179,14 @@ export default {
                 type: "",
             },
             formRules : {
-                funId: [
+                fundId: [
                     { required: true, message: '资金编号不能为空', trigger: 'blur' },
                     { type: 'number', message: '资金编号只能为数字', trigger: 'change' },
                 ],
                 type: [
                     { required: true, message: '资金类型不能为空', trigger: 'blur' },
                 ],
-                assetValue: [
+                fundValue: [
                     { required: true, message: '金额不能为空', trigger: 'blur' },
                     { type: 'number', message: '请输入数字', trigger: 'change' },
                 ],
@@ -213,7 +202,7 @@ export default {
             //
             isDrawerVisible:false,
             // 是否正在加载图表数据
-            isLoadingChartData:false,
+            isLoadingChartData:true,
             // 强制图表重新渲染
             chartKey:ref(0),
             // 图表查询数据
@@ -225,7 +214,7 @@ export default {
             chartData : reactive({
                 type: "pie",
                 title: {
-                    text: "收入类型分布饼状图",
+                    text: "资金类型分布饼状图",
                 },
                 legend: {
                     position: "left",
@@ -256,11 +245,13 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
+        const isLoadingTableData = ref(true);
         /**
          * 方法区
          */
         // 获取表格数据
         const getTableData = () => {
+            isLoadingTableData.value = true;
             service({
                 method: "post",
                 url: "/fund/query",
@@ -270,6 +261,7 @@ export default {
                     const data = response.data;
                     tableData.value = data.list;
                     pageTotal.value = data.total;
+                    isLoadingTableData.value = false;
                 }
             }).catch((error) => {
                 ElMessage.error("加载数据失败：" + error);
@@ -294,6 +286,7 @@ export default {
             query,
             tableData,
             pageTotal,
+            isLoadingTableData,
             getTableData,
             handleSizeChange,
             handlePageChange,
@@ -308,6 +301,7 @@ export default {
         },
         // 更新图表数据
         getChartData(){
+            this.isLoadingChartData = true;
             service({
                 method: "post",
                 url: "/fund/querychart",
@@ -316,6 +310,7 @@ export default {
                 this.chartData.labels = response.data.list.labels;
                 this.chartData.datasets[0].data = response.data.list.data;
                 this.chartKey++;
+                this.isLoadingChartData = false;
             }).catch((error) => {
                 ElMessage.error("加载图表失败：" + error);
             });
@@ -463,8 +458,7 @@ export default {
 }
 
 .handle-input {
-    width: 300px;
-    display: inline-block;
+    width: 500px;
 }
 .table {
     width: 100%;
