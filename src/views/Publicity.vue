@@ -80,7 +80,7 @@
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="编号" prop="hotspotId">
-                    <el-input v-model.number="form.hotspotId"></el-input>
+                    <el-input v-model.number="form.publicityId"></el-input>
                 </el-form-item>
                 <el-form-item label="类型" prop="type">
                     <el-input v-model="form.type"></el-input>
