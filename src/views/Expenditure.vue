@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i>支出管理
+                    <i class="iconfont icon-expenditure"></i>支出管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
