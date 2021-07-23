@@ -40,7 +40,7 @@
                                 v-for="item in imgbox"
                                 :key="item.id"
                             >
-                                <el-image :src="item.src"></el-image>
+                                <el-image style="width: 100%; height: 250px" :fit="fit" :src="item.src"></el-image>
                             </el-carousel-item>
                         </el-carousel>
                     </el-main>
@@ -299,15 +299,15 @@ export default {
             imgbox: [
                 {
                     id: 0,
-                    src: "https://pic.qzmlgfj.ml/images/2020/10/19/b1d332cb1bac08cbc308435220821440.jpg",
+                    src: "https://pic.qzmlgfj.ml/images/2021/07/23/QQ20210723091950.jpg",
                 },
                 {
                     id: 1,
-                    src: "https://pic.qzmlgfj.ml/images/2020/11/16/e6f4f0ba7a2ccbe454ccd94fae95d6ff.png",
+                    src: "https://pic.qzmlgfj.ml/images/2021/07/23/QQ20210723092934.png",
                 },
                 {
                     id: 2,
-                    src: "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+                    src: "https://pic.qzmlgfj.ml/images/2021/07/23/QQ20210723092940.png",
                 },
             ],
             dialogVisible: false,
@@ -385,7 +385,6 @@ export default {
             }).then((Response) => {
                 console.log(Response);
                 this.articleContent = Response.data.list.link;
-                ElMessage.success("good");
             });
         },
         showArticle(item) {
