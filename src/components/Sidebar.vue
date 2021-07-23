@@ -99,9 +99,27 @@ export default {
             },
             {
                 icon: "el-icon-collection",
-                index: "/admin/hotspot",
-                title: "热点信息管理",
-            }
+                index: "3",
+                title: "信息公开管理",
+                subs : [
+                    {
+                        icon: "el-icon-collection",
+                        index: "/admin/hotspot",
+                        title: "热点信息管理",
+                    },
+                    {
+                        icon: "el-icon-collection",
+                        index: "/admin/publicity",
+                        title: "廉政宣传管理",
+                    },
+                    {
+                        icon: "el-icon-collection",
+                        index: "/admin/transaction",
+                        title: "三务信息管理",
+                    },
+                ]
+            },
+
         ];
 
         const route = useRoute();
@@ -135,7 +153,7 @@ export default {
     width: 0;
 }
 .sidebar-el-menu:not(.el-menu--collapse) {
-    width: 140px;
+    width: 170px;
 }
 .sidebar > ul {
     height: 100%;

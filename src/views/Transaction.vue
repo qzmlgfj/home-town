@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i>资产管理
+                    <i class="el-icon-lx-cascades"></i>三务信息管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -11,29 +11,25 @@
             <!-- 上方按钮区-->
             <!--搜索框-->
             <div class="handle-box">
-                <el-select
-                    v-model="searchOption"
-                    @change="isAssetStateSelected = searchOption === 'state';searchContent=''"
-                    class="handle-select mr10"
-                    placeholder="请选择"
-                    filterable
-                    loading-text="数据加载中"
-                    no-match-text="未找到匹配数据"
-                    no-data-text="请选择">
-                    <el-option
-                        v-for="item in searchOptions"
-                        :value="item.value"
-                        :label="item.label">
-                    </el-option>
-                </el-select>
-                <el-select v-if="isAssetStateSelected" v-model="searchContent" placeholder="请选择状态">
-                    <el-option
-                        v-for="item in assetStates"
-                        :label="item.assetState"
-                        :value="item.assetState">
-                    </el-option>
-                </el-select>
-                <el-input v-else v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-input v-model="searchContent" placeholder="输入搜索内容"
+                          class="handle-input mr10" @keyup.enter="handleSearch">
+                    <template #prepend>
+                        <el-select
+                                v-model="searchOption"
+                                class="handle-select mr10"
+                                placeholder="请选择"
+                                filterable
+                                loading-text="数据加载中"
+                                no-match-text="未找到匹配数据"
+                                no-data-text="请选择">
+                            <el-option
+                                    v-for="item in searchOptions"
+                                    :value="item.value"
+                                    :label="item.label">
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -47,70 +43,64 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="assetId" label="资产编号" sortable></el-table-column>
-                <el-table-column prop="type" label="资产类型"  sortable></el-table-column>
-                <el-table-column prop="assetValue" label="资产价值" sortable></el-table-column>
-                <el-table-column label="状态" >
-                    <template #default="scope">
-                        <el-tag :type="assetStates.find(item => item.assetState === scope.row.state).type">
-                            {{scope.row.state}}
-                        </el-tag>
-                    </template>
-                </el-table-column>
+                <el-table-column prop="transId" label="编号"  sortable></el-table-column>
+                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="title" label="标题" sortable></el-table-column>
+                <el-table-column prop="releaseDate" label="发布日期"  sortable></el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
                 <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
-                            size="mini"
-                            @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
+                                size="mini"
+                                @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
                         <el-button
-                            size="mini"
-                            type="danger"
-                            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                                size="mini"
+                                type="danger"
+                                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
             <!--分页组件-->
             <div class="pagination">
                 <el-pagination
-                    background
-                    layout="total, prev, pager, next, sizes"
-                    :current-page="query.pageIndex"
-                    :page-size="query.pageSize"
-                    :total="pageTotal"
-                    :page-sizes="[5, 10, 15, 20]"
-                    @current-change="handlePageChange"
-                    @size-change="handleSizeChange"></el-pagination>
+                        background
+                        layout="total, prev, pager, next, sizes"
+                        :current-page="query.pageIndex"
+                        :page-size="query.pageSize"
+                        :total="pageTotal"
+                        :page-sizes="[5, 10, 15, 20]"
+                        @current-change="handlePageChange"
+                        @size-change="handleSizeChange"></el-pagination>
             </div>
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="资产信息" v-model="editVisible" width="30%"
+        <el-dialog title="三务信息" v-model="editVisible" width="70%"
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
-                <el-form-item label="资产编号" prop="assetId">
-                    <el-input v-model.number="form.assetId"></el-input>
+                <el-form-item label="编号" prop="hotspotId">
+                    <el-input v-model.number="form.hotspotId"></el-input>
                 </el-form-item>
-                <el-form-item label="资产类型" prop="type" >
+                <el-form-item label="类型" prop="type">
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="资产价值" prop="assetValue">
-                    <el-input v-model.number="form.assetValue">
-                        <template #prepend>￥</template>
-                    </el-input>
+                <el-form-item label="标题" prop="title">
+                    <el-input v-model="form.title"></el-input>
                 </el-form-item>
-                <el-form-item label="资产状态" prop="state">
-                    <template #default="scope">
-                        <el-select v-model="form.state" :placeholder="form.state">
-                            <el-option
-                                v-for="item in assetStates"
-                                :value="item.assetState">
-                                {{item.assetState}}
-                            </el-option>
-                        </el-select>
-                    </template>
+                <el-form-item label="发布日期" prop="releaseDate">
+                    <el-date-picker
+                            v-model="form.releaseDate"
+                            type="date"
+                            format="YYYY 年 MM 月 DD 日"
+                            placeholder="请选择日期"
+                            value-format="YYYY-MM-DD">
+                    </el-date-picker>
                 </el-form-item>
+                <el-form-item label="正文" prop="link">
+                    <md-editor v-model="form.link" ></md-editor>
+                </el-form-item>
+
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -124,74 +114,62 @@
 </template>
 
 <script>
-import {reactive, ref} from "vue";
+import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import service from "../utils/request";
-
+import MdEditor from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
 export default {
-    name: "asset-table",
+    name: "transaction",
+    components: {
+        MdEditor
+    },
     data() {
         return {
-            //状态值
-            assetStates: [
-                {assetState: '状态1', type: 'success'},
-                {assetState: '状态2', type: 'info'},
-                {assetState: '状态3', type: 'warning'},
-                {assetState: '状态4', type: 'danger'},
-                {assetState: '状态5', type: ''},
-            ],
             /**
              * 搜索选项，选择后value值会绑定到searchOption中
              * value值为数据库字段值,有空字段是为了全部查询用
              */
             searchOptions : [
-                { value:"asset_id", label : "资产编号"},
-                { value:"asset_value", label : "资产价值"},
-                { value:"state", label : "状态"},
+                { value:"trans_id", label : "编号"},
+                { value:"title", label : "标题"},
             ],
             //用户选择的搜索项目
-            searchOption : "",
+            searchOption:"",
             //用户搜索输入框内容
-            searchContent : "",
+            searchContent:"",
+            //表单数据
+            form:{
+                id:"",
+                transId:"",
+                type:"",
+                title:"",
+                link:"",
+                releaseDate:"",
+            },
+            formRules : {
+                transId: [
+                    { required: true, message: '编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '编号只能为数字', trigger: 'change' },
+                ],
+                type: [
+                    { required: true, message: '类型不能为空', trigger: 'blur' },
+                ],
+                title: [
+                    { required: true, message: '请填写标题', trigger: 'blur' },
+                ],
+                releaseDate: [
+                    { required: true, message: '请选择发布日期', trigger: 'blur' },
+                ],
+            },
             //用户点击的表格行索引
             clickedIndex : -1,
             // 标明为插入操作
             isInsert : false,
             // 标明为更新操作
-            isUpdate : false,
+            isUpdate :false,
             // 表单是否可见
             editVisible : false,
-            isProjectStateSelected : false,
-            //表单数据
-            form : {
-                id:"",
-                assetId:"",
-                type:"",
-                assetValue:"",
-                state:"",
-            },
-            formRules : {
-                assetId: [
-                    { required: true, message: '资产编号不能为空', trigger: 'blur' },
-                    { type: 'number', message: '资产编号只能为数字', trigger: 'change' },
-                ],
-                type: [
-                    { required: true, message: '资产类型不能为空', trigger: 'blur' },
-                ],
-                assetValue: [
-                    { required: true, message: '资产价值不能为空', trigger: 'blur' },
-                    { type: 'number', message: '请输入数字', trigger: 'change' },
-                ],
-                state: [
-                    { required: true, message: '请选择资产状态', trigger: 'blur' },
-                ],
-                startDate:[
-                    { required:true, message:'请选择开始日期',trigger: 'blur'}
-                ],
-                deadLine:[
-                    { required:true, message:'请选择结束日期',trigger: 'blur'}
-                ],
-            },
         }
     },
     setup(){
@@ -199,12 +177,12 @@ export default {
          * 数据区
          */
             // 查询时的数据
-        const query = reactive({
+        let query = {
                 fieldName:"",
                 fieldValue:"",
                 pageIndex: 1,
                 pageSize: 5,
-            });
+            };
         // 表格当前页数据
         const tableData = ref([]);
         // 表格数据总条目数
@@ -213,24 +191,24 @@ export default {
         /**
          * 方法区
          */
-        // 从后端获取表格数据
+            //获取表格数据
         const getTableData = () => {
-            isLoadingTableData.value = true;
-            service({
-                method : "post",
-                url: "/asset/query",
-                data : query
-            }).then((response) => {
-                if (response.code === 200) {
-                    const data = response.data;
-                    tableData.value = data.list
-                    pageTotal.value = data.total
-                    isLoadingTableData.value = false;
-                }
-            }).catch((error) => {
-                ElMessage.error("加载数据失败：" + error)
-            })
-        };
+                isLoadingTableData.value = true;
+                service({
+                    method : "post",
+                    url: "/transaction/query",
+                    data : query
+                }).then((response) => {
+                    if (response.code === 200) {
+                        const data = response.data;
+                        tableData.value = data.list
+                        pageTotal.value = data.total
+                        isLoadingTableData.value = false;
+                    }
+                }).catch((error) => {
+                    ElMessage.error("加载数据失败：" + error)
+                })
+            };
         // 分页导航
         const handlePageChange = (val) => {
             query.pageIndex = val;
@@ -244,7 +222,7 @@ export default {
         /**
          * 执行区，初始化时执行的方法
          */
-        getTableData();
+        getTableData()
         return {
             query,
             tableData,
@@ -263,7 +241,7 @@ export default {
             query.fieldValue = this.searchContent
             service({
                 method : "post",
-                url : "/asset/query",
+                url : "/transaction/query",
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
@@ -271,8 +249,6 @@ export default {
                     this.tableData = data.list
                     this.pageTotal = data.total
                 }
-            }).catch((error) =>{
-                ElMessage.error("查询失败:"+error)
             })
         },
         //表格选择项目改变时
@@ -286,13 +262,14 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
+            //填充表单数据
             const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
                 service({
                     method : "post",
-                    url : "/asset/delete",
+                    url : "/transaction/delete",
                     data : form
                 }).then((response) => {
                     if (response.code === 200) {
@@ -310,10 +287,22 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row){
-            this.clickedIndex = index;
-            this.form = JSON.parse(JSON.stringify(this.tableData[index]));
-            this.isUpdate = true
-            this.editVisible = true
+            service({
+                method : "post",
+                url:"/transaction/queryone",
+                data : this.tableData[index],
+            }).then((response) => {
+                if (response.code === 200) {
+                    //刷新表格
+                    this.form = response.data.list;
+                    this.isUpdate = true
+                    this.editVisible = true
+                } else {
+                    ElMessage.error(`获取正文内容失败：` + response.message);
+                }
+            }).catch((error) => {
+                ElMessage.error(`获取正文内容失败：` + error);
+            })
         },
         //保存更改到后端
         saveUpdate(formName){
@@ -325,7 +314,7 @@ export default {
                     this.editVisible = false
                     service({
                         method : "post",
-                        url:"/asset/update",
+                        url:"/transaction/update",
                         data : form,
                     }).then((response) => {
                         if (response.code === 200) {
@@ -344,7 +333,7 @@ export default {
         //处理新增操作
         handleInsert(){
             //清空表单
-            this.form = {}
+            this.form = {};
             this.isInsert = true
             this.editVisible = true
         },
@@ -352,12 +341,13 @@ export default {
         saveInsert(formName){
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                    const form = JSON.parse(JSON.stringify(this.form));
                     this.isInsert = false
                     this.editVisible = false
                     service({
                         method: "post",
-                        url: "/asset/insert",
-                        data: this.form
+                        url: "/transaction/insert",
+                        data: form
                     }).then((response) => {
                         if (response.code === 200) {
                             ElMessage.success(`插入成功`);
@@ -371,7 +361,6 @@ export default {
                 }
             });
         },
-
     }
 }
 </script>
@@ -386,8 +375,7 @@ export default {
 }
 
 .handle-input {
-    width: 300px;
-    display: inline-block;
+    width: 500px;
 }
 .table {
     width: 100%;

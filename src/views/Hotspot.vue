@@ -263,7 +263,7 @@ export default {
         // 删除操作
         handleDelete(index, row){
             //填充表单数据
-            const form = JSON.parse(JSON.stringify(this.form));
+            const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
@@ -293,17 +293,15 @@ export default {
                 data : this.tableData[index],
             }).then((response) => {
                 if (response.code === 200) {
-                    console.log(response)
-                    ElMessage.success(`编辑成功`);
                     //刷新表格
                     this.form = response.data.list;
                     this.isUpdate = true
                     this.editVisible = true
                 } else {
-                    ElMessage.error(`编辑失败：` + response.message);
+                    ElMessage.error(`获取正文内容失败：` + response.message);
                 }
             }).catch((error) => {
-                ElMessage.error(`编辑失败：` + error);
+                ElMessage.error(`获取正文内容失败：` + error);
             })
         },
         //保存更改到后端

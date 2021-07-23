@@ -57,12 +57,8 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{scope.row.createTime}}</template>
-                </el-table-column>
-                <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{scope.row.updateTime}}</template>
-                </el-table-column>
+                <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
+                <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
@@ -284,7 +280,7 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
-            const form = JSON.parse(JSON.stringify(this.form));
+            const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {

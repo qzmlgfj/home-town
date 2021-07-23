@@ -57,12 +57,8 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{scope.row.createTime}}</template>
-                </el-table-column>
-                <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{scope.row.updateTime}}</template>
-                </el-table-column>
+                <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
+                <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
@@ -180,7 +176,7 @@ export default {
                 ],
             },
             //用户点击的表格行索引
-            idx : -1,
+            clickedIndex : -1,
             // 标明为插入操作
             isInsert : false,
             // 标明为更新操作
@@ -282,7 +278,7 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
-            const form = JSON.parse(JSON.stringify(this.form));
+            const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
@@ -306,7 +302,7 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row){
-            this.idx = index;
+            this.clickedIndex = index;
             this.form = JSON.parse(JSON.stringify(this.tableData[index]));
             this.isUpdate = true
             this.editVisible = true
