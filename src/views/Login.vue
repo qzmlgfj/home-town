@@ -80,7 +80,7 @@ export default {
         const checkPhoneNumber = (rule, value, callback) => {
             const phoneNumberRegex = /^[1][1,2,3,4,5,6,7,8,9][0-9]{9}$/;
             if (value === '' || !phoneNumberRegex.test(value)){
-                callback(new Error("请输入11位手机号"));
+                callback(new Error("请输入11位有效的手机号码"));
             }
         };
         return{
@@ -171,6 +171,7 @@ export default {
         },
         handleRegister(formName){
             this.$refs[formName].validate((valid) => {
+                console.log("register")
                 if (valid) {
                     service({
                         method: "post",
@@ -247,11 +248,6 @@ export default {
     text-align: center;
 }
 .register-btn button {
-    width: 45%;
-    height: 36px;
-    margin-bottom: 10px;
-}
-.rsgisiter-btn button {
     width: 45%;
     height: 36px;
     margin-bottom: 10px;
