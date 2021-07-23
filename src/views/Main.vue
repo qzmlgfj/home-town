@@ -14,7 +14,6 @@
                             <h1>示范区基层公开监督管理平台</h1>
                         </div>
                     </div>
-
                     <div class="header-right">
                         <el-descriptions :title="userName">
                             <el-descriptions-item label="手机号：">{{
@@ -344,9 +343,6 @@ export default {
     methods: {
         login() {
             this.$router.push("/login");
-        },
-        handleCurrentChange(val) {
-            this.query.pageIndex = val;
         },
         handleCurrentChange(val) {
             this.query.pageIndex = val;

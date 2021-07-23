@@ -357,7 +357,7 @@ export default {
         },
         // 删除操作
         handleDelete(index, row) {
-            const form = JSON.parse(JSON.stringify(this.form));
+            const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {

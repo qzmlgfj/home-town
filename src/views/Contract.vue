@@ -47,18 +47,10 @@
                 <el-table-column prop="partA" label="甲方" sortable></el-table-column>
                 <el-table-column prop="partB" label="乙方" sortable></el-table-column>
                 <el-table-column prop="contractName" label="合同名称"  sortable></el-table-column>
-                <el-table-column prop="startDate" label="开始时间"  sortable>
-                    <template #default="scope">{{scope.row.startDate}}</template>
-                </el-table-column>
-                <el-table-column prop="deadLine" label="结束时间"  sortable>
-                    <template #default="scope">{{scope.row.deadLine}}</template>
-                </el-table-column>
-                <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{scope.row.createTime}}</template>
-                </el-table-column>
-                <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{scope.row.updateTime}}</template>
-                </el-table-column>
+                <el-table-column prop="startDate" label="开始时间"  sortable></el-table-column>
+                <el-table-column prop="deadLine" label="结束时间"  sortable></el-table-column>
+                <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
+                <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
@@ -314,7 +306,7 @@ export default {
         // 删除操作
         handleDelete(index, row){
             //填充表单数据
-            const form = JSON.parse(JSON.stringify(this.form));
+            const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
