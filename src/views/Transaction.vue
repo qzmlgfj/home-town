@@ -79,7 +79,7 @@
         <el-dialog title="三务信息" v-model="editVisible" width="70%"
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
-                <el-form-item label="编号" prop="hotspotId">
+                <el-form-item label="编号" prop="transId">
                     <el-input v-model.number="form.transId"></el-input>
                 </el-form-item>
                 <el-form-item label="类型" prop="type">
