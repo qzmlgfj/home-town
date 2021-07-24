@@ -1,7 +1,10 @@
 <template>
     <div>
         <div class="crumbs">
-            <el-breadcrumb separator="/">
+            <el-breadcrumb separator="/" separator-class="el-icon-arrow-right">
+                <el-breadcrumb-item>
+                    <i class="iconfont icon-information"></i>信息公开管理
+                </el-breadcrumb-item>
                 <el-breadcrumb-item>
                     <i class="iconfont icon-hotspot"></i>热点信息管理
                 </el-breadcrumb-item>

@@ -1,7 +1,10 @@
 <template>
     <div>
         <div class="crumbs">
-            <el-breadcrumb separator="/">
+            <el-breadcrumb separator="/" separator-class="el-icon-arrow-right">
+                <el-breadcrumb-item>
+                    <i class="iconfont icon-money"></i>三资管理
+                </el-breadcrumb-item>
                 <el-breadcrumb-item>
                     <i class="iconfont icon-asset"></i>资产管理
                 </el-breadcrumb-item>
@@ -134,11 +137,14 @@ export default {
         return {
             //状态值
             assetStates: [
-                {assetState: '状态1', type: 'success'},
-                {assetState: '状态2', type: 'info'},
-                {assetState: '状态3', type: 'warning'},
-                {assetState: '状态4', type: 'danger'},
-                {assetState: '状态5', type: ''},
+                {assetState: '闲置', type: 'success'},
+                {assetState: '备用', type: 'info'},
+                {assetState: '调剂', type: 'info'},
+                {assetState: '在修', type: 'warning'},
+                {assetState: '待修', type: 'warning'},
+                {assetState: '待报废', type: 'danger'},
+                {assetState: '报废', type: 'danger'},
+                {assetState: '在用', type: ''},
             ],
             /**
              * 搜索选项，选择后value值会绑定到searchOption中
@@ -222,6 +228,7 @@ export default {
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
+                    console.log(response)
                     const data = response.data;
                     tableData.value = data.list
                     pageTotal.value = data.total

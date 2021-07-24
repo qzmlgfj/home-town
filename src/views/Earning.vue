@@ -1,7 +1,10 @@
 <template>
     <div>
         <div class="crumbs">
-            <el-breadcrumb separator="/">
+            <el-breadcrumb separator="/" separator-class="el-icon-arrow-right">
+                <el-breadcrumb-item >
+                    <i class="iconfont icon-earning-and-expenditure"></i>收支管理
+                </el-breadcrumb-item>
                 <el-breadcrumb-item>
                     <i class="iconfont icon-earning"></i>收入管理
                 </el-breadcrumb-item>
