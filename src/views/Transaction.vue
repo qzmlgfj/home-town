@@ -92,6 +92,7 @@
                     <el-date-picker
                             v-model="form.releaseDate"
                             type="date"
+                            :editable="false"
                             format="YYYY 年 MM 月 DD 日"
                             placeholder="请选择日期"
                             value-format="YYYY-MM-DD">

@@ -127,7 +127,7 @@
                     <el-input v-model.number="form.fundId"></el-input>
                 </el-form-item>
                 <el-form-item label="资金类型" prop="type">
-                    <el-input v-model="form.type"></el-input>
+                    <el-input v-model.trim="form.type"></el-input>
                 </el-form-item>
                 <el-form-item label="金额" prop="fundValue">
                     <el-input v-model.number="form.fundValue">

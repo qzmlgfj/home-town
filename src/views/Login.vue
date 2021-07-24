@@ -82,6 +82,7 @@ export default {
             if (value === '' || !phoneNumberRegex.test(value)){
                 callback(new Error("请输入11位有效的手机号码"));
             }
+            callback();
         };
         return{
             loginForm:reactive({
@@ -104,8 +105,7 @@ export default {
             }),
             registerFormRules:reactive({
                 phoneNumber: [
-                    {required: true, validator: checkPhoneNumber, trigger: "blur"},
-                    { type : 'number', validator: checkPhoneNumber , trigger: "change" },
+                    { type : 'number', validator: checkPhoneNumber , trigger: ['blur', 'change']},
                 ],
                 username: [
                     {required: true, message: "请输入用户名", trigger: "blur"},
@@ -171,7 +171,6 @@ export default {
         },
         handleRegister(formName){
             this.$refs[formName].validate((valid) => {
-                console.log("register")
                 if (valid) {
                     service({
                         method: "post",

@@ -97,6 +97,7 @@
                     <el-date-picker
                         v-model="form.startDate"
                         type="date"
+                        :editable="false"
                         format="YYYY 年 MM 月 DD 日"
                         placeholder="请选择开始日期"
                         value-format="YYYY-MM-DD">
@@ -106,6 +107,7 @@
                     <el-date-picker
                         v-model="form.deadLine"
                         type="date"
+                        :editable="false"
                         format="YYYY 年 MM 月 DD 日"
                         placeholder="请选择结束日期"
                         value-format="YYYY-MM-DD">
