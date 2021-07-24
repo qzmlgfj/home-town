@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i>支出管理
+                    <i class="iconfont icon-expenditure"></i>支出管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -11,45 +11,36 @@
             <!-- 上方按钮区-->
             <!--搜索框-->
             <div class="handle-box">
-                <el-select
-                    v-model="searchOption"
-                    class="handle-select mr10"
-                    placeholder="请选择"
-                    filterable
-                    loading-text="数据加载中"
-                    no-match-text="未找到匹配数据"
-                    no-data-text="请选择"
-                >
-                    <el-option
-                        v-for="item in searchOptions"
-                        :value="item.value"
-                        :label="item.label"
-                    >
-                    </el-option>
-                </el-select>
-                <el-input
-                    v-model="searchContent"
-                    placeholder="输入搜索内容"
-                    class="handle-input mr10"
-                    @keyup.enter="handleSearch"
-                ></el-input>
-                <el-button
-                    type="primary"
-                    icon="el-icon-search"
-                    @click="handleSearch"
-                    >搜索</el-button
-                >
-                <el-button
-                    type="primary"
-                    icon="el-icon-plus"
-                    @click="handleInsert"
-                    >新增</el-button
-                >
+                <el-input v-model="searchContent" placeholder="输入搜索内容"
+                    class="handle-input mr10" @keyup.enter="handleSearch">
+                    <template #prepend>
+                        <el-select
+                                v-model="searchOption"
+                                class="handle-select mr10"
+                                placeholder="请选择"
+                                filterable
+                                loading-text="数据加载中"
+                                no-match-text="未找到匹配数据"
+                                no-data-text="请选择"
+                        >
+                            <el-option
+                                    v-for="item in searchOptions"
+                                    :value="item.value"
+                                    :label="item.label"
+                            >
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-input>
+                <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+                <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
                 <el-button icon="el-icon-data-analysis" @click="initChart" type="success">统计分析</el-button>
             </div>
             <!--表格区-->
             <el-table
                 :data="tableData"
+                v-loading="isLoadingTableData"
+                element-loading-text="数据加载中"
                 class="table"
                 ref="multipleTable"
                 header-cell-class-name="table-header"
@@ -62,15 +53,9 @@
                 <el-table-column prop="itemName" label="支出名称" sortable></el-table-column>
                 <el-table-column prop="money" label="金额" sortable></el-table-column>
                 <el-table-column prop="itemDate" label="日期" sortable></el-table-column>
-                <el-table-column prop="description" label="备注" sortable>
-                    <template #default="scope">{{scope.row.description }}</template>
-                </el-table-column>
-                <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{scope.row.createTime }}</template>
-                </el-table-column>
-                <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{scope.row.updateTime }}</template>
-                </el-table-column>
+                <el-table-column prop="description" label="备注" sortable></el-table-column>
+                <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
+                <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
@@ -133,25 +118,26 @@
             width="30%"
             @closed="handleDialogClosed"
         >
-            <el-form label-width="80px" :model="form" :rules="formRules" ref="form">
-                <el-form-item label="支出编号" >
+            <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
+                <el-form-item label="支出编号" prop="itemId">
                     <el-input v-model.number="form.itemId"></el-input>
                 </el-form-item>
-                <el-form-item label="支出类型">
+                <el-form-item label="支出类型" prop="type">
                     <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="支出名称">
+                <el-form-item label="支出名称" prop="itemName">
                     <el-input v-model="form.itemName"></el-input>
                 </el-form-item>
-                <el-form-item label="金额">
+                <el-form-item label="金额" prop="money">
                     <el-input v-model.number="form.money">
                         <template #prepend>￥</template>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="日期">
+                <el-form-item label="日期" prop="itemDate">
                     <el-date-picker
                         v-model="form.itemDate"
                         type="date"
+                        :editable="false"
                         format="YYYY 年 MM 月 DD 日"
                         placeholder="请选择时间"
                         value-format="YYYY-MM-DD">
@@ -225,7 +211,7 @@ export default {
                     { type: 'number', message: '支出编号只能为数字', trigger: 'change' },
                 ],
                 itemName: [
-                    { required: true, message: '请选择资产状态', trigger: 'change' },
+                    { required: true, message: '请选择资产状态', trigger: 'blur' },
                 ],
                 type: [
                     { required: true, message: '资产类型不能为空', trigger: 'blur' },
@@ -290,12 +276,13 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
-
+        const isLoadingTableData = ref(true);
         /**
          * 方法区
          */
         // 从后端获取表格数据
         const getTableData = () => {
+            isLoadingTableData.value = true;
             service({
                 method: "post",
                 url: "/expenditure/query",
@@ -305,6 +292,7 @@ export default {
                     const data = response.data;
                     tableData.value = data.list;
                     pageTotal.value = data.total;
+                    isLoadingTableData.value = false;
                 }
             }).catch((error) => {
                 ElMessage.error("加载数据失败：" + error);
@@ -328,6 +316,7 @@ export default {
             query,
             tableData,
             pageTotal,
+            isLoadingTableData,
             getTableData,
             handleSizeChange,
             handlePageChange,
@@ -396,7 +385,7 @@ export default {
         },
         // 删除操作
         handleDelete(index, row) {
-            const form = JSON.parse(JSON.stringify(this.form));
+            const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
@@ -494,8 +483,7 @@ export default {
 }
 
 .handle-input {
-    width: 300px;
-    display: inline-block;
+    width: 500px;
 }
 .table {
     width: 100%;

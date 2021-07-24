@@ -5,7 +5,7 @@
             <i v-if="!collapse" class="el-icon-s-fold"></i>
             <i v-else class="el-icon-s-unfold"></i>
         </div>
-        <div class="logo">后台管理系统</div>
+        <div class="logo">后台管理</div>
         <div class="header-right">
             <div class="header-user-con">
 <!--                &lt;!&ndash; 消息中心 &ndash;&gt;-->
@@ -29,7 +29,7 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item command="user">个人中心</el-dropdown-item>
+                            <el-dropdown-item command="user">信息门户</el-dropdown-item>
                             <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>

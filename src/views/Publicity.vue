@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="iconfont icon-project"></i> 项目管理
+                    <i class="iconfont icon-publicity"></i>廉政宣传管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -11,29 +11,25 @@
             <!-- 上方按钮区-->
             <!--搜索框-->
             <div class="handle-box">
-                <el-select
-                    v-model="searchOption"
-                    @change="isProjectStateSelected = searchOption === 'state';searchContent=''"
-                    class="handle-select mr10"
-                    placeholder="请选择"
-                    filterable
-                    loading-text="数据加载中"
-                    no-match-text="未找到匹配数据"
-                    no-data-text="请选择">
-                    <el-option
-                        v-for="item in searchOptions"
-                        :value="item.value"
-                        :label="item.label">
-                    </el-option>
-                </el-select>
-                <el-select  v-if="isProjectStateSelected" v-model="searchContent" placeholder="请选择状态">
-                    <el-option
-                        v-for="item in projectStates"
-                        :label="item.projectState"
-                        :value="item.projectState">
-                    </el-option>
-                </el-select>
-                <el-input  v-else v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-input v-model="searchContent" placeholder="输入搜索内容"
+                          class="handle-input mr10" @keyup.enter="handleSearch">
+                    <template #prepend>
+                        <el-select
+                                v-model="searchOption"
+                                class="handle-select mr10"
+                                placeholder="请选择"
+                                filterable
+                                loading-text="数据加载中"
+                                no-match-text="未找到匹配数据"
+                                no-data-text="请选择">
+                            <el-option
+                                    v-for="item in searchOptions"
+                                    :value="item.value"
+                                    :label="item.label">
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -47,68 +43,65 @@
                       border highlight-current-row
                       @selection-change="handleTableSelectionChange"
             >
-                <el-table-column prop="projectId" label="项目编号"  sortable></el-table-column>
-                <el-table-column prop="projectName" label="项目名称" sortable></el-table-column>
-                <el-table-column prop="principal" label="负责人" sortable></el-table-column>
-                <el-table-column label="状态" >
-                    <template #default="scope">
-                        <el-tag :type="projectStates.find(item => item.projectState === scope.row.state).type">
-                            {{scope.row.state}}
-                        </el-tag>
-                    </template>
-                </el-table-column>
+                <el-table-column prop="publicityId" label="编号"  sortable></el-table-column>
+                <el-table-column prop="type" label="类型" sortable></el-table-column>
+                <el-table-column prop="title" label="标题" sortable></el-table-column>
+                <el-table-column prop="releaseDate" label="发布日期"  sortable></el-table-column>
                 <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
                 <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
-                            size="mini"
-                            @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
+                                size="mini"
+                                @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
                         <el-button
-                            size="mini"
-                            type="danger"
-                            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                                size="mini"
+                                type="danger"
+                                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
             <!--分页组件-->
             <div class="pagination">
                 <el-pagination
-                    background
-                    layout="total, prev, pager, next, sizes"
-                    :current-page="query.pageIndex"
-                    :page-size="query.pageSize"
-                    :total="pageTotal"
-                    :page-sizes="[5, 10, 15, 20]"
-                    @current-change="handlePageChange"
-                    @size-change="handleSizeChange"></el-pagination>
+                        background
+                        layout="total, prev, pager, next, sizes"
+                        :current-page="query.pageIndex"
+                        :page-size="query.pageSize"
+                        :total="pageTotal"
+                        :page-sizes="[5, 10, 15, 20]"
+                        @current-change="handlePageChange"
+                        @size-change="handleSizeChange"></el-pagination>
             </div>
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="项目信息" v-model="editVisible" width="30%"
+        <el-dialog title="廉政宣传信息" v-model="editVisible" width="70%"
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
-                <el-form-item label="项目编号" prop="projectId">
-                    <el-input v-model.number="form.projectId"></el-input>
+                <el-form-item label="编号" prop="hotspotId">
+                    <el-input v-model.number="form.publicityId"></el-input>
                 </el-form-item>
-                <el-form-item label="项目名称" prop="projectName">
-                    <el-input v-model="form.projectName"></el-input>
+                <el-form-item label="类型" prop="type">
+                    <el-input v-model="form.type"></el-input>
                 </el-form-item>
-                <el-form-item label="项目负责人" prop="projectLeader">
-                    <el-input v-model="form.principal"></el-input>
+                <el-form-item label="标题" prop="title">
+                    <el-input v-model="form.title"></el-input>
                 </el-form-item>
-                <el-form-item label="状态" prop="state">
-                    <template #default="scope">
-                        <el-select v-model="form.state" :placeholder="form.state">
-                            <el-option
-                                v-for="item in projectStates"
-                                :value="item.projectState">
-                                {{item.projectState}}
-                            </el-option>
-                        </el-select>
-                    </template>
+                <el-form-item label="发布日期" prop="releaseDate">
+                    <el-date-picker
+                            v-model="form.releaseDate"
+                            type="date"
+                            :editable="false"
+                            format="YYYY 年 MM 月 DD 日"
+                            placeholder="请选择日期"
+                            value-format="YYYY-MM-DD">
+                    </el-date-picker>
                 </el-form-item>
+                <el-form-item label="正文" prop="link">
+                    <md-editor v-model="form.link" ></md-editor>
+                </el-form-item>
+
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -125,28 +118,22 @@
 import { ref} from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import service from "../utils/request";
-
+import MdEditor from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
 export default {
-    name: "project",
+    name: "publicity",
+    components: {
+        MdEditor
+    },
     data() {
         return {
-            //状态值
-            projectStates: [
-                {projectState: '状态1', type: 'success'},
-                {projectState: '状态2', type: 'info'},
-                {projectState: '状态3', type: 'warning'},
-                {projectState: '状态4', type: 'danger'},
-                {projectState: '状态5', type: ''},
-            ],
             /**
              * 搜索选项，选择后value值会绑定到searchOption中
              * value值为数据库字段值,有空字段是为了全部查询用
              */
             searchOptions : [
-                { value:"project_id", label : "项目编号"},
-                { value:"project_name", label : "项目名称"},
-                { value:"principal", label : "负责人"},
-                { value:"state", label : "状态"},
+                { value:"publicity_id", label : "编号"},
+                { value:"title", label : "标题"},
             ],
             //用户选择的搜索项目
             searchOption:"",
@@ -155,24 +142,25 @@ export default {
             //表单数据
             form:{
                 id:"",
-                projectId:"",
-                projectName:"",
-                principal:"",
-                state:"",
+                publicityId:"",
+                type:"",
+                title:"",
+                link:"",
+                releaseDate:"",
             },
             formRules : {
-                projectId: [
-                    { required: true, message: '项目编号不能为空', trigger: 'blur' },
-                    { type: 'number', message: '项目编号只能为数字', trigger: 'change' },
+                publicityId: [
+                    { required: true, message: '编号不能为空', trigger: 'blur' },
+                    { type: 'number', message: '编号只能为数字', trigger: 'change' },
                 ],
-                projectName: [
-                    { required: true, message: '项目名称不能为空', trigger: 'blur' },
+                type: [
+                    { required: true, message: '类型不能为空', trigger: 'blur' },
                 ],
-                principal: [
-                    { required: true, message: '请输入项目负责人', trigger: 'blur' },
+                title: [
+                    { required: true, message: '请填写标题', trigger: 'blur' },
                 ],
-                state: [
-                    { required: true, message: '项目状态不能为空', trigger: 'blur' },
+                releaseDate: [
+                    { required: true, message: '请选择发布日期', trigger: 'blur' },
                 ],
             },
             //用户点击的表格行索引
@@ -183,7 +171,6 @@ export default {
             isUpdate :false,
             // 表单是否可见
             editVisible : false,
-            isProjectStateSelected:false,
         }
     },
     setup(){
@@ -205,13 +192,13 @@ export default {
         /**
          * 方法区
          */
-            // 从后端获取表格数据
+            //获取表格数据
         const getTableData = () => {
                 isLoadingTableData.value = true;
                 service({
                     method : "post",
-                    url : "/project/query",
-                    data: query
+                    url: "/publicity/query",
+                    data : query
                 }).then((response) => {
                     if (response.code === 200) {
                         const data = response.data;
@@ -255,16 +242,14 @@ export default {
             query.fieldValue = this.searchContent
             service({
                 method : "post",
-                url : "/project/query",
+                url : "/publicity/query",
                 data : query
             }).then((response) => {
                 if (response.code === 200) {
-                    var data = response.data
+                    const data = response.data;
                     this.tableData = data.list
                     this.pageTotal = data.total
                 }
-            }).catch((error) => {
-                ElMessage("查询失败"+error)
             })
         },
         //表格选择项目改变时
@@ -278,13 +263,14 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
+            //填充表单数据
             const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
                 service({
                     method : "post",
-                    url : "/project/delete",
+                    url : "/publicity/delete",
                     data : form
                 }).then((response) => {
                     if (response.code === 200) {
@@ -302,10 +288,22 @@ export default {
         },
         //处理保存动作
         handleUpdate(index, row){
-            this.clickedIndex = index;
-            this.form = JSON.parse(JSON.stringify(this.tableData[index]));
-            this.isUpdate = true
-            this.editVisible = true
+            service({
+                method : "post",
+                url:"/publicity/queryone",
+                data : this.tableData[index],
+            }).then((response) => {
+                if (response.code === 200) {
+                    //刷新表格
+                    this.form = response.data.list;
+                    this.isUpdate = true
+                    this.editVisible = true
+                } else {
+                    ElMessage.error(`获取正文内容失败：` + response.message);
+                }
+            }).catch((error) => {
+                ElMessage.error(`获取正文内容失败：` + error);
+            })
         },
         //保存更改到后端
         saveUpdate(formName){
@@ -317,7 +315,7 @@ export default {
                     this.editVisible = false
                     service({
                         method : "post",
-                        url:"/project/update",
+                        url:"/publicity/update",
                         data : form,
                     }).then((response) => {
                         if (response.code === 200) {
@@ -335,20 +333,22 @@ export default {
         },
         //处理新增操作
         handleInsert(){
-            this.form = {}
+            //清空表单
+            this.form = {};
             this.isInsert = true
             this.editVisible = true
         },
         // 保存新增数据到后端
-        saveInsert(formName) {
+        saveInsert(formName){
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                    const form = JSON.parse(JSON.stringify(this.form));
                     this.isInsert = false
                     this.editVisible = false
                     service({
                         method: "post",
-                        url: "/project/insert",
-                        data: this.form
+                        url: "/publicity/insert",
+                        data: form
                     }).then((response) => {
                         if (response.code === 200) {
                             ElMessage.success(`插入成功`);
@@ -361,7 +361,7 @@ export default {
                     })
                 }
             });
-        }
+        },
     }
 }
 </script>
@@ -376,8 +376,7 @@ export default {
 }
 
 .handle-input {
-    width: 300px;
-    display: inline-block;
+    width: 500px;
 }
 .table {
     width: 100%;
@@ -387,4 +386,5 @@ export default {
 .mr10 {
     margin-right: 10px;
 }
+
 </style>

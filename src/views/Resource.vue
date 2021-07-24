@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i>资源管理
+                    <i class="iconfont icon-resource"></i>资源管理
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -13,7 +13,7 @@
             <div class="handle-box">
                 <el-select
                     v-model="searchOption"
-                    @change="isResourceStateSelcted = searchOption === 'state';searchContent=''"
+                    @change="isResourceStateSelected = searchOption === 'state';searchContent=''"
                     class="handle-select mr10"
                     placeholder="请选择"
                     filterable
@@ -26,7 +26,7 @@
                         :label="item.label">
                     </el-option>
                 </el-select>
-                <el-select v-if="isResourceStateSelcted" v-model="searchContent" placeholder="请选择状态">
+                <el-select v-if="isResourceStateSelected" v-model="searchContent" placeholder="请选择状态">
                     <el-option
                         v-for="item in resourceStates"
                         :label="item.resourceState"
@@ -39,6 +39,8 @@
             </div>
             <!--表格区-->
             <el-table :data="tableData"
+                      v-loading="isLoadingTableData"
+                      element-loading-text="数据加载中"
                       class="table"
                       ref="multipleTable"
                       header-cell-class-name="table-header"
@@ -55,12 +57,8 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="createTime" label="建立时间" sortable>
-                    <template #default="scope">{{scope.row.createTime}}</template>
-                </el-table-column>
-                <el-table-column prop="updateTime" label="更新时间" sortable>
-                    <template #default="scope">{{scope.row.updateTime}}</template>
-                </el-table-column>
+                <el-table-column prop="createTime" label="建立时间" sortable></el-table-column>
+                <el-table-column prop="updateTime" label="更新时间" sortable></el-table-column>
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button
@@ -176,7 +174,7 @@ export default {
                     { required: true, message: '资源类型不能为空', trigger: 'blur' },
                 ],
                 state: [
-                    { required: true, message: '请选择资产状态', trigger: 'change' },
+                    { required: true, message: '请选择资产状态', trigger: 'blur' },
                 ],
             },
             //用户点击的表格行索引
@@ -187,7 +185,7 @@ export default {
             isUpdate :false,
             // 表单是否可见
             editVisible : false,
-            isResourceStateSelcted:false,
+            isResourceStateSelected:false,
         }
     },
     setup(){
@@ -205,20 +203,23 @@ export default {
         const tableData = ref([]);
         // 表格数据总条目数
         const pageTotal = ref(0);
+        const isLoadingTableData = ref(true);
         /**
          * 方法区
          */
             // 从后端获取表格数据
         const getTableData = () => {
+                isLoadingTableData.value = true;
                 service({
                     method : "post",
                     url: "/resource/query",
                     data : query
                 }).then((response) => {
                     if (response.code === 200) {
-                        var data = response.data
+                        const data = response.data;
                         tableData.value = data.list
                         pageTotal.value = data.total
+                        isLoadingTableData.value = false;
                     }
                 }).catch((error) => {
                     ElMessage.error("加载数据失败：" + error)
@@ -242,6 +243,7 @@ export default {
             query,
             tableData,
             pageTotal,
+            isLoadingTableData,
             getTableData,
             handleSizeChange,
             handlePageChange,
@@ -278,7 +280,7 @@ export default {
         },
         // 删除操作
         handleDelete(index, row){
-            const form = JSON.parse(JSON.stringify(this.form));
+            const form = JSON.parse(JSON.stringify(this.tableData[index]));
             ElMessageBox.confirm("确定要删除吗？", "提示", {
                 type: "warning",
             }).then(() => {
@@ -384,16 +386,8 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.red {
-    color: #ff0000;
-}
+
 .mr10 {
     margin-right: 10px;
-}
-.table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
 }
 </style>

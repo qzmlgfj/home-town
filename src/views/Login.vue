@@ -31,7 +31,7 @@
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="phoneNumber">
-                    <el-input v-model="registerForm.phoneNumber" placeholder="手机号码" prefix-icon="el-icon-phone">
+                    <el-input v-model.number="registerForm.phoneNumber" placeholder="手机号码" prefix-icon="el-icon-phone">
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="password">
@@ -77,6 +77,13 @@ export default {
         },
     },
     data(){
+        const checkPhoneNumber = (rule, value, callback) => {
+            const phoneNumberRegex = /^[1][1,2,3,4,5,6,7,8,9][0-9]{9}$/;
+            if (value === '' || !phoneNumberRegex.test(value)){
+                callback(new Error("请输入11位有效的手机号码"));
+            }
+            callback();
+        };
         return{
             loginForm:reactive({
                 phoneNumber: "19982006581",
@@ -98,7 +105,7 @@ export default {
             }),
             registerFormRules:reactive({
                 phoneNumber: [
-                    {required: true, message: "请输入手机号", trigger: "blur"},
+                    { type : 'number', validator: checkPhoneNumber , trigger: ['blur', 'change']},
                 ],
                 username: [
                     {required: true, message: "请输入用户名", trigger: "blur"},
@@ -240,11 +247,6 @@ export default {
     text-align: center;
 }
 .register-btn button {
-    width: 45%;
-    height: 36px;
-    margin-bottom: 10px;
-}
-.rsgisiter-btn button {
     width: 45%;
     height: 36px;
     margin-bottom: 10px;
