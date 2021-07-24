@@ -20,7 +20,7 @@
                                 phoneNumber
                             }}</el-descriptions-item>
                             <el-descriptions-item label="备注：">
-                                <el-tag size="small"> 普通用户 </el-tag>
+                                <el-tag size="small"> {{userType}} </el-tag>
                             </el-descriptions-item>
                             <el-descriptions-item>
                                 <el-button type="text" @click="logout"
@@ -40,7 +40,11 @@
                                 v-for="item in imgbox"
                                 :key="item.id"
                             >
-                                <el-image style="width: 100%; height: 250px" :fit="fit" :src="item.src"></el-image>
+                                <el-image
+                                    style="width: 100%; height: 250px"
+                                    :fit="fit"
+                                    :src="item.src"
+                                ></el-image>
                             </el-carousel-item>
                         </el-carousel>
                     </el-main>
@@ -226,11 +230,11 @@
 
 <script>
 import { ElButton } from "element-plus";
-import { ref} from "vue";
-import { ElMessage} from "element-plus";
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
 import service from "../utils/request";
 import Markdown from "vue3-markdown-it";
-import {useRouter} from "vue-router";
+import { useRouter } from "vue-router";
 
 export default {
     name: "Main",
@@ -240,6 +244,11 @@ export default {
         let mainpart = ref("三务公开");
         const userName = ref("欢迎您，" + localStorage.getItem("ms_username"));
         const phoneNumber = ref(localStorage.getItem("ms_userphone"));
+        const userType = ref(
+            localStorage.getItem("ms_usertype") === "admin"
+                ? "管理员"
+                : "普通用户"
+        );
         const router = useRouter();
         const query = {
             pageIndex: 1,
@@ -287,6 +296,7 @@ export default {
             query,
             userName,
             phoneNumber,
+            userType,
             getData,
             showAffair,
             showHotspot,
