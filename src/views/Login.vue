@@ -214,7 +214,7 @@ export default {
     line-height: 50px;
     text-align: center;
     font-size: 20px;
-    color: #fff;
+    color: rgb(17, 81, 110);
     border-bottom: 1px solid #ddd;
 }
 .ms-login {
