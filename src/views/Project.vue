@@ -90,13 +90,13 @@
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="项目编号" prop="projectId">
-                    <el-input v-model.number="form.projectId"></el-input>
+                    <el-input v-model.number="form.projectId" ></el-input>
                 </el-form-item>
                 <el-form-item label="项目名称" prop="projectName">
-                    <el-input v-model="form.projectName"></el-input>
+                    <el-input v-model="form.projectName" ></el-input>
                 </el-form-item>
                 <el-form-item label="项目负责人" prop="projectLeader">
-                    <el-input v-model="form.principal"></el-input>
+                    <el-input v-model="form.principal" ></el-input>
                 </el-form-item>
                 <el-form-item label="状态" prop="state">
                     <template #default="scope">
@@ -132,11 +132,11 @@ export default {
         return {
             //状态值
             projectStates: [
-                {projectState: '状态1', type: 'success'},
-                {projectState: '状态2', type: 'info'},
-                {projectState: '状态3', type: 'warning'},
-                {projectState: '状态4', type: 'danger'},
-                {projectState: '状态5', type: ''},
+                {projectState: '已完成', type: 'success'},
+                {projectState: '审核中', type: 'warning'},
+                {projectState: '审核失败', type: 'danger'},
+                {projectState: '立项中', type: ''},
+                {projectState: '实施中', type: ''},
             ],
             /**
              * 搜索选项，选择后value值会绑定到searchOption中
