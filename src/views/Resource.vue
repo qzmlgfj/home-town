@@ -12,18 +12,18 @@
             <!--搜索框-->
             <div class="handle-box">
                 <el-select
-                    v-model="searchOption"
-                    @change="isResourceStateSelected = searchOption === 'state';searchContent=''"
-                    class="handle-select mr10"
-                    placeholder="请选择"
-                    filterable
-                    loading-text="数据加载中"
-                    no-match-text="未找到匹配数据"
-                    no-data-text="请选择">
+                        v-model="searchOption"
+                        @change="isResourceStateSelected = searchOption === 'state';searchContent=''"
+                        class="handle-select mr10"
+                        placeholder="请选择"
+                        filterable
+                        loading-text="数据加载中"
+                        no-match-text="未找到匹配数据"
+                        no-data-text="请选择">
                     <el-option
-                        v-for="item in searchOptions"
-                        :value="item.value"
-                        :label="item.label">
+                            v-for="item in searchOptions"
+                            :value="item.value"
+                            :label="item.label">
                     </el-option>
                 </el-select>
                 <el-select v-if="isResourceStateSelected" v-model="searchContent" placeholder="请选择状态">
@@ -33,7 +33,9 @@
                         :value="item.resourceState">
                     </el-option>
                 </el-select>
-                <el-input  v-else v-model="searchContent" placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch"></el-input>
+                <el-input  v-else v-model="searchContent"
+                           placeholder="输入搜索内容" class="handle-input mr10" @keyup.enter="handleSearch">
+                </el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch" >搜索</el-button>
                 <el-button type="primary" icon="el-icon-plus" @click="handleInsert">新增</el-button>
             </div>
@@ -134,11 +136,11 @@ export default {
         return {
             //状态值
             resourceStates: [
-                {resourceState: '状态1', type: 'success'},
-                {resourceState: '状态2', type: 'info'},
-                {resourceState: '状态3', type: 'warning'},
-                {resourceState: '状态4', type: 'danger'},
-                {resourceState: '状态5', type: ''},
+                {resourceState: '空闲', type: 'success'},
+                {resourceState: '租借中', type: 'info'},
+                {resourceState: '使用中', type: 'warning'},
+                {resourceState: '抵押中', type: 'danger'},
+                {resourceState: '建设中', type: ''},
             ],
             /**
              * 搜索选项，选择后value值会绑定到searchOption中

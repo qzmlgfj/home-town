@@ -55,7 +55,7 @@
                     <template #default="scope">
                         <el-button
                             size="mini"
-                            @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
+                            @click="handleUpdate(scope.$index, scope.row)">查看</el-button>
                         <el-button
                             size="mini"
                             type="danger"
@@ -82,22 +82,23 @@
                    @closed="handleDialogClosed">
             <el-form label-width="90px" :model="form" :rules="formRules" ref="form">
                 <el-form-item label="合同编号" prop="contractId">
-                    <el-input v-model.number="form.contractId"></el-input>
+                    <el-input v-model.number="form.contractId" :disabled="isUpdate"></el-input>
                 </el-form-item>
                 <el-form-item label="合同名称" prop="contractName">
-                    <el-input v-model="form.contractName"></el-input>
+                    <el-input v-model="form.contractName" :disabled="isUpdate"></el-input>
                 </el-form-item>
                 <el-form-item label="甲方" prop="partA">
-                    <el-input v-model="form.partA"></el-input>
+                    <el-input v-model="form.partA" :disabled="isUpdate"></el-input>
                 </el-form-item>
                 <el-form-item label="乙方" prop="partB">
-                    <el-input v-model="form.partB"></el-input>
+                    <el-input v-model="form.partB" :disabled="isUpdate"></el-input>
                 </el-form-item>
                 <el-form-item label="开始日期" prop="startDate">
                     <el-date-picker
                         v-model="form.startDate"
                         type="date"
                         :editable="false"
+                        :disabled="isUpdate"
                         format="YYYY 年 MM 月 DD 日"
                         placeholder="请选择开始日期"
                         value-format="YYYY-MM-DD">
@@ -108,6 +109,7 @@
                         v-model="form.deadLine"
                         type="date"
                         :editable="false"
+                        :disabled="isUpdate"
                         format="YYYY 年 MM 月 DD 日"
                         placeholder="请选择结束日期"
                         value-format="YYYY-MM-DD">
