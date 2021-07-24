@@ -137,6 +137,7 @@
                     <el-date-picker
                         v-model="form.itemDate"
                         type="date"
+                        :editable="false"
                         format="YYYY 年 MM 月 DD 日"
                         placeholder="请选择时间"
                         value-format="YYYY-MM-DD">

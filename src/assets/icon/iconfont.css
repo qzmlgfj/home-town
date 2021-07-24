@@ -1,0 +1,85 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 2696999 */
+  src: url('iconfont.woff2?t=1627055715014') format('woff2'),
+       url('iconfont.woff?t=1627055715014') format('woff'),
+       url('iconfont.ttf?t=1627055715014') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 18px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-home:before {
+  content: "\e610";
+  margin-right:5px;
+}
+
+.icon-money:before {
+  content: "\e65f";
+ margin-right:5px;
+}
+
+.icon-earning:before {
+  content: "\e66b";
+ margin-right:5px;
+}
+
+.icon-information:before {
+  content: "\e615";
+ margin-right:5px;
+}
+
+.icon-expenditure:before {
+  content: "\e667";
+ margin-right:5px;
+}
+
+.icon-hotspot:before {
+  content: "\e6ec";
+ margin-right:5px;
+}
+
+.icon-publicity:before {
+  content: "\e62c";
+ margin-right:5px;
+}
+
+.icon-asset:before {
+  content: "\e661";
+ margin-right:5px;
+}
+
+.icon-resource:before {
+  content: "\e62d";
+ margin-right:5px;
+}
+
+.icon-fund:before {
+  content: "\e65d";
+ margin-right:5px;
+}
+
+.icon-transaction:before {
+  content: "\e673";
+ margin-right:5px;
+}
+
+.icon-earning-and-expenditure:before {
+  content: "\e6a3";
+ margin-right:5px;
+}
+
+.icon-project:before {
+  content: "\ebc5";
+ margin-right:5px;
+}
+
+.icon-contract:before {
+  content: "\e68a";
+ margin-right:5px;
+}
+
